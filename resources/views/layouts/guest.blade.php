@@ -56,12 +56,10 @@
         .auth-card-box .form-control::placeholder {
             color: #9ca3af !important;
         }
-        /* Fix logo text on light background */
+        /* Fix logo text - pure black on auth page */
         .auth-logo-link .logo-text span {
             opacity: 1 !important;
-        }
-        .auth-logo-link .logo-text .text-secondary {
-            color: #4f46e5 !important;
+            color: #000000 !important;
         }
         /* Subtext color fix - override any gray inline styles */
         .auth-card-box p[style*="color:#6b7280"],
