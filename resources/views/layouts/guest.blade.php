@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" class="light" data-header-styles="dark" data-menu-styles="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" class="light">
 <head>
+    {{-- Force light mode BEFORE Valex main.js can apply dark theme from localStorage --}}
+    <script>document.documentElement.className = 'light';</script>
     @include('layouts.partials.valex.head')
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -115,8 +117,8 @@
         </div>
     </div>
 
-    {{-- RIGHT PANEL: Form --}}
-    <div class="auth-form-side w-full lg:w-[45%] flex flex-col items-center justify-center bg-white dark:bg-[#0e1726] px-6 py-10">
+    {{-- RIGHT PANEL: Form (always light) --}}
+    <div class="auth-form-side w-full lg:w-[45%] flex flex-col items-center justify-center px-6 py-10" style="background-color: #f3f4f6;">
         
         {{-- Mobile Logo (visible only on small screens) --}}
         <div class="mb-6 lg:hidden text-center">
@@ -129,79 +131,21 @@
         </div>
 
         <div class="w-full max-w-md auth-card">
-            <div class="box shadow-sm rounded-xl border border-gray-100 dark:border-defaultborder/10 bg-white dark:bg-[#141c2e]">
-                <div class="box-body !p-8">
+            <div style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                <div style="padding: 2rem;">
                     {{ $slot }}
                 </div>
             </div>
         </div>
 
-        {{-- Dark Mode Toggle --}}
-        <div class="mt-6 flex items-center gap-3">
-            <button 
-                id="auth-dark-toggle"
-                onclick="toggleAuthDarkMode()"
-                class="inline-flex items-center gap-2 text-[0.8rem] text-gray-500 dark:text-gray-400 hover:text-primary transition-colors duration-200"
-            >
-                <i id="dark-icon" class="ri-moon-line text-base"></i>
-                <span id="dark-label">Switch to Dark Mode</span>
-            </button>
-        </div>
-
-        <div class="text-center mt-4">
+        <div class="text-center mt-6">
             <p class="text-textmuted text-[0.75rem] mb-0">&copy; {{ date('Y') }} VetConnect. All rights reserved.</p>
         </div>
     </div>
 
 </div>
 
-<script>
-    // On load: restore preference
-    (function() {
-        const saved = localStorage.getItem('auth-dark-mode');
-        if (saved === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.body.classList.add('dark');
-        }
-    })();
 
-    function toggleAuthDarkMode() {
-        const html = document.documentElement;
-        const body = document.body;
-        const icon = document.getElementById('dark-icon');
-        const label = document.getElementById('dark-label');
-        
-        if (html.classList.contains('dark')) {
-            html.classList.remove('dark');
-            body.classList.remove('dark');
-            localStorage.setItem('auth-dark-mode', 'light');
-            icon.className = 'ri-moon-line text-base';
-            label.textContent = 'Switch to Dark Mode';
-        } else {
-            html.classList.add('dark');
-            body.classList.add('dark');
-            localStorage.setItem('auth-dark-mode', 'dark');
-            icon.className = 'ri-sun-line text-base';
-            label.textContent = 'Switch to Light Mode';
-        }
-        // Sync with valex theme system
-        const current = html.classList.contains('dark') ? 'dark' : 'light';
-        html.className = current;
-        document.getElementById('auth-dark-toggle').querySelector('span').textContent = 
-            current === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-    }
-
-    // Sync icon on page load
-    window.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('auth-dark-mode');
-        const icon = document.getElementById('dark-icon');
-        const label = document.getElementById('dark-label');
-        if (saved === 'dark') {
-            icon.className = 'ri-sun-line text-base';
-            label.textContent = 'Switch to Light Mode';
-        }
-    });
-</script>
 
 @include('layouts.partials.valex.scripts')
 </body>

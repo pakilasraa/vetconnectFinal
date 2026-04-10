@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-5 text-center">
-        <h4 class="font-semibold text-xl text-defaulttextcolor dark:text-defaulttextcolor/70 mb-1">Sign In</h4>
-        <p class="text-textmuted text-[0.85rem]">Welcome back to VetConnect!</p>
+        <h4 style="font-size:1.25rem; font-weight:700; color:#111827; margin-bottom:0.25rem;">Sign In</h4>
+        <p style="font-size:0.875rem; color:#6b7280;">Welcome back to VetConnect!</p>
     </div>
 
     <!-- Session Status -->
@@ -10,46 +10,63 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <div class="grid grid-cols-12 gap-y-4">
+        <div style="display:flex; flex-direction:column; gap:1rem;">
             <!-- Email Address -->
-            <div class="col-span-12">
-                <label for="email" class="form-label text-defaulttextcolor font-semibold">Email Address</label>
-                <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Enter your email">
-                <x-input-error :messages="$errors->get('email')" class="mt-2 text-danger text-sm" />
+            <div>
+                <label for="email" style="display:block; font-size:0.875rem; font-weight:600; color:#374151; margin-bottom:0.35rem;">Email Address</label>
+                <input 
+                    id="email" 
+                    class="form-control" 
+                    type="email" 
+                    name="email" 
+                    value="{{ old('email') }}" 
+                    required autofocus autocomplete="username" 
+                    placeholder="Enter your email"
+                    style="width:100%; background:#fff; color:#111827; border:1px solid #d1d5db;"
+                >
+                <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 
             <!-- Password -->
-            <div class="col-span-12">
-                <div class="flex justify-between">
-                    <label for="password" class="form-label text-defaulttextcolor font-semibold">Password</label>
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                    <label for="password" style="font-size:0.875rem; font-weight:600; color:#374151;">Password</label>
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-[0.75rem] text-textmuted hover:text-primary font-medium">
+                        <a href="{{ route('password.request') }}" style="font-size:0.75rem; color:#6366f1; font-weight:500; text-decoration:none;">
                             Forgot password?
                         </a>
                     @endif
                 </div>
-                <input id="password" class="form-control" type="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
-                <x-input-error :messages="$errors->get('password')" class="mt-2 text-danger text-sm" />
+                <input 
+                    id="password" 
+                    class="form-control"
+                    type="password" 
+                    name="password" 
+                    required autocomplete="current-password" 
+                    placeholder="Enter your password"
+                    style="width:100%; background:#fff; color:#111827; border:1px solid #d1d5db;"
+                >
+                <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
 
             <!-- Remember Me -->
-            <div class="col-span-12">
-                <div class="form-check !ps-0 flex items-center">
-                    <input class="form-check-input !border-gray-300 dark:!border-gray-600 rounded !mt-0 !me-2" type="checkbox" id="remember_me" name="remember">
-                    <label class="form-check-label text-[#8c9097] text-[0.8125rem] font-normal" for="remember_me">
-                        Remember me
-                    </label>
-                </div>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+                <input class="form-check-input" type="checkbox" id="remember_me" name="remember" style="margin:0;">
+                <label for="remember_me" style="font-size:0.8125rem; color:#6b7280; margin:0; cursor:pointer;">Remember me</label>
             </div>
 
-            <div class="col-span-12 mt-2">
-                <button type="submit" class="ti-btn ti-btn-primary-full w-full">
-                    Log In <i class="fe fe-log-in ms-2"></i>
+            <div style="margin-top:0.5rem;">
+                <button type="submit" class="ti-btn ti-btn-primary-full" style="width:100%;">
+                    Log In &nbsp;<i class="fe fe-log-in"></i>
                 </button>
             </div>
         </div>
     </form>
-    <div class="text-center mt-4">
-        <p class="text-textmuted text-[0.8125rem] mb-0">Don't have an account? <a href="{{ route('register') }}" class="text-primary font-semibold">Sign Up</a></p>
+
+    <div style="text-align:center; margin-top:1rem;">
+        <p style="font-size:0.8125rem; color:#6b7280; margin:0;">
+            Don't have an account? 
+            <a href="{{ route('register') }}" style="color:#6366f1; font-weight:600; text-decoration:none;">Sign Up</a>
+        </p>
     </div>
 </x-guest-layout>
