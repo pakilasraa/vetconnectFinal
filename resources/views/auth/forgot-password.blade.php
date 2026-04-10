@@ -1,6 +1,7 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+    <div class="mb-5 text-center">
+        <h4 class="font-semibold text-xl text-defaulttextcolor dark:text-defaulttextcolor/70 mb-1">Forgot Password</h4>
+        <p class="text-textmuted text-[0.85rem]">We will email you a password reset link.</p>
     </div>
 
     <!-- Session Status -->
@@ -9,17 +10,23 @@
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <div class="grid grid-cols-12 gap-y-4">
+            <!-- Email Address -->
+            <div class="col-span-12">
+                <label for="email" class="form-label text-defaulttextcolor font-semibold">Email Address</label>
+                <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Enter your email address">
+                <x-input-error :messages="$errors->get('email')" class="mt-2 text-danger text-sm" />
+            </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
+            <div class="col-span-12 mt-2">
+                <button type="submit" class="ti-btn ti-btn-primary-full w-full">
+                    Email Password Reset Link <i class="fe fe-mail ms-2"></i>
+                </button>
+            </div>
         </div>
     </form>
+    
+    <div class="text-center mt-4">
+        <p class="text-textmuted text-[0.8125rem] mb-0">Remembered your password? <a href="{{ route('login') }}" class="text-primary font-semibold">Log In</a></p>
+    </div>
 </x-guest-layout>
