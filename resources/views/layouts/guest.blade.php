@@ -36,9 +36,39 @@
         }
         .auth-footer-text {
             font-size: 0.75rem;
-            color: #9ca3af;
+            color: #6b7280;
             margin-top: 1.5rem;
             text-align: center;
+        }
+        /* Fix: ensure all text in auth card is pure black and readable */
+        .auth-card-box label,
+        .auth-card-box p,
+        .auth-card-box h4,
+        .auth-card-box h5,
+        .auth-card-box span:not(.ti-btn *) {
+            color: #000000 !important;
+        }
+        .auth-card-box .form-control {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+            border-color: #d1d5db !important;
+        }
+        .auth-card-box .form-control::placeholder {
+            color: #9ca3af !important;
+        }
+        /* Fix logo text on light background */
+        .auth-logo-link .logo-text span {
+            opacity: 1 !important;
+        }
+        .auth-logo-link .logo-text .text-secondary {
+            color: #4f46e5 !important;
+        }
+        /* Subtext color fix - override any gray inline styles */
+        .auth-card-box p[style*="color:#6b7280"],
+        .auth-card-box p[style*="color: #6b7280"],
+        .auth-card-box p[style*="color:#374151"],
+        .auth-card-box p[style*="color: #374151"] {
+            color: #000000 !important;
         }
     </style>
 </head>
