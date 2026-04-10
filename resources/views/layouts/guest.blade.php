@@ -30,24 +30,9 @@
         .auth-logo-link {
             display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
+            justify-content: center;
             text-decoration: none;
             margin-bottom: 1.75rem;
-        }
-        .auth-logo-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #6366f1, #10b981);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .auth-logo-text {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #111827;
-            letter-spacing: 0.01em;
         }
         .auth-footer-text {
             font-size: 0.75rem;
@@ -64,11 +49,8 @@
     <div class="auth-card-wrapper">
         {{-- Logo --}}
         <div style="text-align:center;">
-            <a href="{{ url('/') }}" class="auth-logo-link" style="justify-content:center;">
-                <div class="auth-logo-icon">
-                    <i class="ri-heart-pulse-line" style="color:#fff; font-size:1.2rem;"></i>
-                </div>
-                <span class="auth-logo-text">VetConnect</span>
+            <a href="{{ url('/') }}" class="auth-logo-link">
+                @include('layouts.partials.valex.logo', ['class' => ''])
             </a>
         </div>
 
