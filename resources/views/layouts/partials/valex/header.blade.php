@@ -56,7 +56,7 @@
           </div>
         </div>
 
-        <!-- start header country -->
+        <!-- start header country -->{{--
         <div class="header-element  header-country hs-dropdown ti-dropdown" data-hs-dropdown-placement="bottom-right">
 
           <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-auto-close="outside"
@@ -152,7 +152,7 @@
             </div>
           </div>
         </div>
-        <!-- end header country -->
+        --}}<!-- end header country -->
 
         <!-- light and dark theme -->
         <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] !px-[0.65rem]">
@@ -177,7 +177,7 @@
         </div>
         <!-- End light and dark theme -->
 
-        <!-- Header Massage item -->
+        <!-- Header Massage item -->{{--
         <div
           class="header-element py-[1rem] px-[0.65rem] notifications-dropdown header-notification hs-dropdown ti-dropdown !hidden md:!flex"
           data-hs-dropdown-placement="bottom-right">
@@ -294,9 +294,9 @@
             </div>
           </div>
         </div>
-        <!--End Header Massage item  -->
+        --}}<!--End Header Massage item  -->
 
-        <!--Header Notifictaion -->
+        <!--Header Notifictaion -->{{--
         <div
           class="header-element py-[1rem] px-[0.65rem] notifications-dropdown header-notification hs-dropdown ti-dropdown !hidden md:!flex"
           data-hs-dropdown-placement="bottom-right">
@@ -430,7 +430,7 @@
             </div>
           </div>
         </div>
-        <!--End Header Notifictaion -->
+        --}}<!--End Header Notifictaion -->
 
         <!-- Fullscreen -->
         <div class="header-element header-fullscreen py-[1rem] md:px-[0.65rem] px-2">

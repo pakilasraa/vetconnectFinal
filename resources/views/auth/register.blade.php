@@ -22,6 +22,19 @@
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 
+            <!-- Role Selection -->
+            <div>
+                <label for="role" style="display:block; font-size:0.875rem; font-weight:600; color:#000000; margin-bottom:0.35rem;">Role</label>
+                <select id="role" class="form-control" name="role" required style="width:100%; background:#fff; color:#111827; border:1px solid #d1d5db; padding:0.45rem 0.9rem; border-radius:0.25rem;">
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="owner" {{ old('role') == 'owner' ? 'selected' : '' }}>Pet Owner</option>
+                    <option value="vet" {{ old('role') == 'vet' ? 'selected' : '' }}>Veterinarian</option>
+                    <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
+                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
+                </select>
+                <x-input-error :messages="$errors->get('role')" class="mt-2" />
+            </div>
+
             <!-- Password -->
             <div>
                 <label for="password" style="display:block; font-size:0.875rem; font-weight:600; color:#000000; margin-bottom:0.35rem;">Password</label>

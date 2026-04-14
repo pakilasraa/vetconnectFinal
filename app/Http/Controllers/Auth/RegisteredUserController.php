@@ -33,17 +33,25 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', 'in:owner,vet,staff,admin'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Role-based redirection: Separate Client (owner) and Admin
+        if ($user->role === 'owner') {
+            // I-redirect ang client sa client UI (palitan ang '/client' kung iba ang URL ninyo)
+            return redirect('/client');
+        }
 
         return redirect(route('dashboard', absolute: false));
     }
