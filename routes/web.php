@@ -7,6 +7,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Client (Pet Owner) portal — shown when the client UI is not yet ready
+Route::get('/client', function () {
+    if (auth()->check() && auth()->user()->role !== 'owner') {
+        return redirect(route('dashboard'));
+    }
+    return view('client.coming-soon');
+})->middleware('auth')->name('client.home');
+
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

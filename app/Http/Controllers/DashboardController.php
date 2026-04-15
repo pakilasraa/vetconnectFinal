@@ -15,7 +15,13 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $isOwner = $user->role === 'owner';
+
+        // Pet owners should never see the admin dashboard
+        if ($user->role === 'owner') {
+            return redirect('/client');
+        }
+
+        $isOwner = false;
 
         // 1. Counters
         if ($isOwner) {
