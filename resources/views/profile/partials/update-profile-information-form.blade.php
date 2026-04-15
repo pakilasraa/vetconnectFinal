@@ -13,9 +13,31 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
+
+        <div class="mb-4">
+            <label class="form-label">{{ __('Profile Photo') }}</label>
+            <div class="flex items-center gap-4">
+                <div class="h-16 w-16 rounded-full overflow-hidden border border-defaultborder bg-white">
+                    <img src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('backend/assets/images/faces/9.jpg') }}" alt="Profile Photo" class="h-full w-full object-cover">
+                </div>
+                <div class="flex-1">
+                    <input id="photo" name="photo" type="file" accept="image/*" class="form-control" />
+                    @if ($errors->get('photo'))
+                        <ul class="text-sm text-danger mt-2">
+                            @foreach ($errors->get('photo') as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    <div class="mt-3">
+                        <button type="submit" class="ti-btn ti-btn-secondary ti-btn-wave">{{ __('Save Photo') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="mb-4">
             <label for="name" class="form-label">{{ __('Name') }}</label>
