@@ -11,7 +11,7 @@
                     Record New Consultation
                 </div>
             </div>
-            <form action="{{ route('medical-records.store') }}" method="POST">
+            <form action="{{ panel_route('medical-records.store') }}" method="POST">
                 @csrf
                 <div class="box-body">
                     <div class="grid grid-cols-12 gap-x-6 gap-y-4">
@@ -63,7 +63,7 @@
                 </div>
                 <div class="box-footer">
                     <button type="submit" class="ti-btn ti-btn-primary-full ti-btn-wave">Save Record</button>
-                    <a href="{{ route('medical-records.index') }}" class="ti-btn ti-btn-secondary-full ti-btn-wave">Cancel</a>
+                    <a href="{{ panel_route('medical-records.index') }}" class="ti-btn ti-btn-secondary-full ti-btn-wave">Cancel</a>
                 </div>
             </form>
         </div>

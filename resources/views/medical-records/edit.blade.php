@@ -11,7 +11,7 @@
                     Edit Consultation Record
                 </div>
             </div>
-            <form action="{{ route('medical-records.update', $medicalRecord->id) }}" method="POST">
+            <form action="{{ panel_route('medical-records.update', $medicalRecord->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="box-body">
@@ -63,7 +63,7 @@
                 </div>
                 <div class="box-footer">
                     <button type="submit" class="ti-btn ti-btn-primary-full ti-btn-wave">Update Record</button>
-                    <a href="{{ route('medical-records.index') }}" class="ti-btn ti-btn-secondary-full ti-btn-wave">Cancel</a>
+                    <a href="{{ panel_route('medical-records.index') }}" class="ti-btn ti-btn-secondary-full ti-btn-wave">Cancel</a>
                 </div>
             </form>
         </div>

@@ -10,9 +10,9 @@
                 <div class="box-title">
                     Consultation Records
                 </div>
-                @if(auth()->user()->role !== 'owner')
+                @if(auth()->user()->isAdmin())
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('medical-records.create') }}" class="ti-btn !py-1 !px-2 ti-btn-primary !font-medium !text-[0.75rem]">
+                    <a href="{{ panel_route('medical-records.create') }}" class="ti-btn !py-1 !px-2 ti-btn-primary !font-medium !text-[0.75rem]">
                         New Consultation<i class="ri-add-circle-line ms-2 inline-block align-middle"></i>
                     </a>
                 </div>
@@ -34,17 +34,17 @@
                             @forelse ($records as $record)
                                 <tr class="border-b border-defaultborder">
                                     <td>{{ \Carbon\Carbon::parse($record->visit_date)->format('M d, Y') }}</td>
-                                    <td><a href="{{ route('pets.show', $record->pet_id) }}" class="text-primary font-medium">{{ $record->pet->name }}</a></td>
+                                    <td><a href="{{ panel_route('pets.show', $record->pet_id) }}" class="text-primary font-medium">{{ $record->pet->name }}</a></td>
                                     <td>{{ Str::limit($record->diagnosis, 50) }}</td>
                                     <td>{{ $record->vet->name }}</td>
                                     <td>
                                         <div class="flex items-center gap-2">
-                                            @if(auth()->user()->role !== 'owner')
-                                            <a href="{{ route('medical-records.edit', $record->id) }}"
+                                            @if(auth()->user()->isAdmin())
+                                            <a href="{{ panel_route('medical-records.edit', $record->id) }}"
                                                 class="text-info text-[.875rem] leading-none">
                                                 <i class="ri-edit-line"></i>
                                             </a>
-                                            <form action="{{ route('medical-records.destroy', $record->id) }}" method="POST" class="inline">
+                                            <form action="{{ panel_route('medical-records.destroy', $record->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-danger text-[.875rem] leading-none" onclick="return confirm('Are you sure you want to delete this record?')">

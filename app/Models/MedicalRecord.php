@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class MedicalRecord extends Model
 {
+    protected $casts = [
+        'visit_date' => 'date',
+    ];
+
     protected $fillable = [
         'pet_id',
         'vet_id',

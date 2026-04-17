@@ -59,7 +59,7 @@
                         <div class="tab-content">
                             {{-- Medical Records --}}
                             <div class="tab-pane active" id="medical-records" role="tabpanel">
-                                @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+                                @if(auth()->user()->isAdmin())
                                 <div class="mb-3 text-end">
                                     <button class="ti-btn ti-btn-primary-full ti-btn-wave" data-bs-toggle="modal" data-bs-target="#addMedicalRecordModal">
                                         Add Medical Record
@@ -74,7 +74,7 @@
                                                 <th>Vet</th>
                                                 <th>Diagnosis</th>
                                                 <th>Treatment</th>
-                                                @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+                                                @if(auth()->user()->isAdmin())
                                                 <th>Action</th>
                                                 @endif
                                             </tr>
@@ -86,9 +86,9 @@
                                                     <td>{{ $record->vet->name }}</td>
                                                     <td>{{ $record->diagnosis }}</td>
                                                     <td>{{ $record->treatment }}</td>
-                                                    @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+                                                    @if(auth()->user()->isAdmin())
                                                     <td>
-                                                        <form action="{{ route('medical-records.destroy', $record->id) }}" method="POST" class="inline">
+                                                        <form action="{{ panel_route('medical-records.destroy', $record->id) }}" method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="text-danger" onclick="return confirm('Delete this record?')">
@@ -107,7 +107,7 @@
                             </div>
                             {{-- Vaccinations --}}
                             <div class="tab-pane" id="vaccinations" role="tabpanel">
-                                @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+                                @if(auth()->user()->isAdmin())
                                 <div class="mb-3 text-end">
                                     <button class="ti-btn ti-btn-primary-full ti-btn-wave" data-bs-toggle="modal" data-bs-target="#addVaccinationModal">
                                         Add Vaccination
@@ -122,7 +122,7 @@
                                                 <th>Date Given</th>
                                                 <th>Due Date</th>
                                                 <th>Status</th>
-                                                @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+                                                @if(auth()->user()->isAdmin())
                                                 <th>Action</th>
                                                 @endif
                                             </tr>
@@ -138,9 +138,9 @@
                                                             {{ ucfirst($vax->status) }}
                                                         </span>
                                                     </td>
-                                                    @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+                                                    @if(auth()->user()->isAdmin())
                                                     <td>
-                                                        <form action="{{ route('vaccination-records.destroy', $vax->id) }}" method="POST" class="inline">
+                                                        <form action="{{ panel_route('vaccination-records.destroy', $vax->id) }}" method="POST" class="inline">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="text-danger" onclick="return confirm('Delete this vaccination record?')">
@@ -194,7 +194,7 @@
     </div>
 
     {{-- Modals --}}
-    @if(in_array(auth()->user()->role, ['vet', 'staff', 'admin']))
+    @if(auth()->user()->isAdmin())
     <!-- Add Medical Record Modal -->
     <div class="modal fade" id="addMedicalRecordModal" tabindex="-1" aria-labelledby="addMedicalRecordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -203,7 +203,7 @@
                     <h6 class="modal-title" id="addMedicalRecordModalLabel">Add Medical Record</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('medical-records.store') }}" method="POST">
+                <form action="{{ panel_route('medical-records.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="pet_id" value="{{ $pet->id }}">
                     <input type="hidden" name="vet_id" value="{{ auth()->id() }}">
@@ -242,7 +242,7 @@
                     <h6 class="modal-title" id="addVaccinationModalLabel">Add Vaccination Record</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('vaccination-records.store') }}" method="POST">
+                <form action="{{ panel_route('vaccination-records.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="pet_id" value="{{ $pet->id }}">
                     <div class="modal-body">

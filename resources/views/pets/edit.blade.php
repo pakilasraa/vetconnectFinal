@@ -10,19 +10,24 @@
             <div class="box-header">
                 <div class="box-title">Pet Details</div>
             </div>
-            <form action="{{ route('pets.update', $pet->id) }}" method="POST">
+            <form action="{{ panel_route('pets.update', $pet->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="box-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="xl:col-span-6 col-span-12">
                             <label for="owner_id" class="form-label">Owner</label>
-                            <select name="owner_id" id="owner_id" class="form-control" required>
-                                <option value="">Select Owner</option>
-                                @foreach($owners as $owner)
-                                    <option value="{{ $owner->id }}" {{ $pet->owner_id == $owner->id ? 'selected' : '' }}>{{ $owner->name }} ({{ $owner->email }})</option>
-                                @endforeach
-                            </select>
+                            @if(auth()->user()->isPetOwner())
+                                <input type="hidden" name="owner_id" value="{{ $pet->owner_id }}">
+                                <input type="text" class="form-control" value="{{ auth()->user()->name }}" readonly>
+                            @else
+                                <select name="owner_id" id="owner_id" class="form-control" required>
+                                    <option value="">Select Owner</option>
+                                    @foreach($owners as $owner)
+                                        <option value="{{ $owner->id }}" {{ $pet->owner_id == $owner->id ? 'selected' : '' }}>{{ $owner->name }} ({{ $owner->email }})</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                         <div class="xl:col-span-6 col-span-12">
                             <label for="name" class="form-label">Pet Name</label>
@@ -59,7 +64,7 @@
                     </div>
                 </div>
                 <div class="box-footer text-end">
-                    <a href="{{ route('pets.index') }}" class="ti-btn ti-btn-light">Cancel</a>
+                    <a href="{{ panel_route('pets.index') }}" class="ti-btn ti-btn-light">Cancel</a>
                     <button type="submit" class="ti-btn ti-btn-primary">Update Pet</button>
                 </div>
             </form>

@@ -2,51 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MedicalRecord;
+use App\Http\Controllers\Concerns\RedirectsToPanelRoute;
 use App\Models\ActivityLog;
+use App\Models\MedicalRecord;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class MedicalRecordController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use RedirectsToPanelRoute;
+
+    public function index(Request $request): View
     {
         $user = auth()->user();
-        if ($user->role === 'owner') {
-            $records = MedicalRecord::whereHas('pet', function($query) use ($user) {
+        if ($user->isPetOwner()) {
+            $records = MedicalRecord::whereHas('pet', function ($query) use ($user) {
                 $query->where('owner_id', $user->id);
             })->with(['pet', 'vet'])->orderBy('visit_date', 'desc')->get();
         } else {
             $records = MedicalRecord::with(['pet', 'vet'])->orderBy('visit_date', 'desc')->get();
         }
 
+        if ($request->routeIs('client.*')) {
+            return view('client.medical-records.index', compact('records'));
+        }
+
         return view('medical-records.index', compact('records'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): View
     {
-        $user = auth()->user();
-        if ($user->role === 'owner') {
+        if (auth()->user()->isPetOwner()) {
             abort(403);
         }
 
         $pets = \App\Models\Pet::with('owner')->get();
-        $vets = \App\Models\User::whereIn('role', ['admin', 'staff', 'vet'])->get();
+        $vets = \App\Models\User::where('role', 'admin')->get();
 
         return view('medical-records.create', compact('pets', 'vets'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        if (auth()->user()->role === 'owner') {
+        if (auth()->user()->isPetOwner()) {
             abort(403);
         }
 
@@ -62,24 +61,24 @@ class MedicalRecordController extends Controller
         $record = MedicalRecord::create($validated);
         ActivityLog::log('Added Medical Record', "Added medical record for pet '{$record->pet->name}'", $record);
 
-        return redirect()->route('medical-records.index')->with('success', 'Medical record added successfully.');
+        return $this->panelRedirect('medical-records.index')->with('success', 'Medical record added successfully.');
     }
 
-    public function edit(MedicalRecord $medicalRecord)
+    public function edit(MedicalRecord $medicalRecord): View
     {
-        if (auth()->user()->role === 'owner') {
+        if (auth()->user()->isPetOwner()) {
             abort(403);
         }
 
         $pets = \App\Models\Pet::all();
-        $vets = \App\Models\User::whereIn('role', ['admin', 'staff', 'vet'])->get();
+        $vets = \App\Models\User::where('role', 'admin')->get();
 
         return view('medical-records.edit', compact('medicalRecord', 'pets', 'vets'));
     }
 
-    public function update(Request $request, MedicalRecord $medicalRecord)
+    public function update(Request $request, MedicalRecord $medicalRecord): RedirectResponse
     {
-        if (auth()->user()->role === 'owner') {
+        if (auth()->user()->isPetOwner()) {
             abort(403);
         }
 
@@ -95,20 +94,18 @@ class MedicalRecordController extends Controller
         $medicalRecord->update($validated);
         ActivityLog::log('Updated Medical Record', "Updated medical record for pet '{$medicalRecord->pet->name}'", $medicalRecord);
 
-        return redirect()->route('medical-records.index')->with('success', 'Medical record updated successfully.');
+        return $this->panelRedirect('medical-records.index')->with('success', 'Medical record updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(MedicalRecord $medicalRecord)
+    public function destroy(MedicalRecord $medicalRecord): RedirectResponse
     {
-        if (auth()->user()->role === 'owner') {
+        if (auth()->user()->isPetOwner()) {
             abort(403);
         }
 
         ActivityLog::log('Deleted Medical Record', "Deleted medical record ID {$medicalRecord->id}");
         $medicalRecord->delete();
+
         return back()->with('success', 'Medical record deleted successfully.');
     }
 }

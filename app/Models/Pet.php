@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Pet extends Model
 {
+    protected $casts = [
+        'birth_date' => 'date',
+    ];
+
     protected $fillable = [
         'owner_id',
         'name',
@@ -35,5 +40,14 @@ class Pet extends Model
     public function vaccinationRecords()
     {
         return $this->hasMany(VaccinationRecord::class);
+    }
+
+    public function getAgeAttribute(): ?string
+    {
+        if (! $this->birth_date) {
+            return null;
+        }
+
+        return Carbon::parse($this->birth_date)->age.' yrs';
     }
 }
