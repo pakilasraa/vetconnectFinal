@@ -1,53 +1,73 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ClientDashboardController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\PetController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UnauthorizedController;
+use App\Http\Controllers\VaccinationRecordController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/not-authorized', UnauthorizedController::class)
+    ->middleware('auth')
+    ->name('not-authorized');
 
-    Route::get('/client/dashboard', [\App\Http\Controllers\ClientDashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('client.dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+        $verified = $request->query('verified');
+        $query = $verified !== null ? ['verified' => $verified] : [];
 
-Route::middleware('auth')->group(function () {
+        if ($user->isPetOwner()) {
+            return redirect()->route('client.dashboard', $query);
+        }
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard', $query);
+        }
+
+        return redirect()->route('not-authorized');
+    })->name('dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    //route for user managament
-    Route::get(uri: '/users/index', action: [ProfileController::class, 'getAllUsers'])->name(name: 'users.index');
-    Route::get(uri: '/users/create', action: [ProfileController::class, 'create'])->name(name: 'users.create');
-    Route::post(uri: '/users/store', action: [ProfileController::class, 'store'])->name(name: 'users.store');
-
-    //route for user management edit, update, delete
-    Route::get(uri: '/users/{id}/edit', action: [ProfileController::class, 'editUser'])->name(name: 'users.edit');
-    Route::put(uri: '/users/{id}', action: [ProfileController::class, 'updateUser'])->name(name: 'users.update');
-    Route::delete(uri: '/users/{id}', action: [ProfileController::class, 'destroyUser'])->name(name: 'users.destroy');
-
-
-    // Pet Management
-    Route::resource('pets', \App\Http\Controllers\PetController::class);
-
-    // Appointment Management
-    Route::resource('appointments', \App\Http\Controllers\AppointmentController::class);
-
-    // Medical Records
-    Route::resource('medical-records', \App\Http\Controllers\MedicalRecordController::class);
-
-    // Vaccination Records
-    Route::resource('vaccination-records', \App\Http\Controllers\VaccinationRecordController::class);
-
-    // Activity Logs
-    Route::get('activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
-
-    // Global Search
-    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
 });
 
-require __DIR__ . '/auth.php';
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+    Route::get('/users/index', [ProfileController::class, 'getAllUsers'])->name('users.index');
+    Route::get('/users/create', [ProfileController::class, 'create'])->name('users.create');
+    Route::post('/users/store', [ProfileController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}/edit', [ProfileController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{id}', [ProfileController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{id}', [ProfileController::class, 'destroyUser'])->name('users.destroy');
+
+    Route::resource('pets', PetController::class);
+    Route::resource('appointments', AppointmentController::class);
+    Route::resource('medical-records', MedicalRecordController::class);
+    Route::resource('vaccination-records', VaccinationRecordController::class);
+
+    Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+});
+
+Route::middleware(['auth', 'verified', 'role:pet_owner'])->prefix('client')->name('client.')->group(function () {
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('pets', PetController::class);
+    Route::resource('appointments', AppointmentController::class);
+    Route::patch('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::resource('medical-records', MedicalRecordController::class)->only(['index']);
+    Route::resource('vaccination-records', VaccinationRecordController::class)->only(['index']);
+});
+
+require __DIR__.'/auth.php';

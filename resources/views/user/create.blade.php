@@ -18,7 +18,7 @@
 
                 </div>
 
-                <form action="{{route('users.store')}}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="box-body">
@@ -54,10 +54,8 @@
                             <label for="input-role" class="form-label">Role</label>
                             <select name="role" id="input-role" class="form-control" required>
                                 <option value="" disabled selected>Select Role</option>
-                                <option value="admin">Admin</option>
-                                <option value="staff">Staff</option>
-                                <option value="vet">Vet</option>
-                                <option value="owner">Owner</option>
+                                <option value="admin">Administrator</option>
+                                <option value="pet_owner">Pet owner</option>
                             </select>
                         </div>
 

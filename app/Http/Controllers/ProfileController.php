@@ -62,10 +62,6 @@ class ProfileController extends Controller
 
     public function getAllUsers(): View
     {
-        if (auth()->user()->role === 'owner') {
-            abort(403);
-        }
-
         $users = \App\Models\User::orderBy('created_at', 'desc')
             ->get();
 
@@ -75,10 +71,6 @@ class ProfileController extends Controller
         //create user
     public function create(): View
     {
-        if (auth()->user()->role === 'owner') {
-            abort(403);
-        }
-
         return view(view: 'user.create');
     }
 
@@ -88,7 +80,7 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|string|in:admin,staff,vet,owner',
+            'role' => 'required|string|in:admin,pet_owner',
             'birthdate' => 'nullable|date',
             'photo' => 'nullable|image|max:2048', // max 2MB
         ]);
@@ -107,7 +99,7 @@ class ProfileController extends Controller
             'photo' => $photoPath,
         ]);
 
-        return Redirect::route('users.index')->with('success', 'User created successfully.');
+        return Redirect::route('admin.users.index')->with('success', 'User created successfully.');
     }
 
     public function editUser($id): View
@@ -125,7 +117,7 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8',
-            'role' => 'required|string|in:admin,staff,vet,owner',
+            'role' => 'required|string|in:admin,pet_owner',
             'birthdate' => 'nullable|date',
             'photo' => 'nullable|image|max:2048', // max 2MB
         ]);
@@ -149,18 +141,14 @@ class ProfileController extends Controller
 
         $user->update($userData);
 
-        return Redirect::route('users.index')->with('success', 'User updated successfully.');
+        return Redirect::route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     public function destroyUser($id): RedirectResponse
     {
-        if (auth()->user()->role === 'owner') {
-            abort(403);
-        }
-
         $user = User::findOrFail($id);
         $user->delete();
 
-        return Redirect::route('users.index')->with('success', 'User deleted successfully.');
+        return Redirect::route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 }

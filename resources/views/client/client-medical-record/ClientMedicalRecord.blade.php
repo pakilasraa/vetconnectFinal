@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.client-app')
 
 @section('title', 'Medical Records - VetConnect')
 
@@ -12,7 +12,7 @@
 
 <!-- Filters -->
 <div class="card">
-    <form action="{{ route('medical-records.index') }}" method="GET" class="filters-form">
+    <form action="{{ panel_route('medical-records.index') }}" method="GET" class="filters-form">
         <div class="form-row">
             <div class="form-group">
                 <label for="search" class="form-label">Search</label>
@@ -79,8 +79,8 @@
                 </div>
 
                 <div class="record-actions">
-                    <a href="{{ route('medical-records.show', $record) }}" class="btn btn-outline btn-sm">👁️ View</a>
-                    <a href="{{ route('medical-records.download', $record) }}" class="btn btn-outline btn-sm">⬇️ Download</a>
+                    <a href="{{ panel_route('medical-records.show', $record) }}" class="btn btn-outline btn-sm">👁️ View</a>
+                    <a href="{{ panel_route('medical-records.download', $record) }}" class="btn btn-outline btn-sm">⬇️ Download</a>
                 </div>
             </div>
         @endforeach
