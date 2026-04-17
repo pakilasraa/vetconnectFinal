@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.clientapp')
 
 @section('title', 'Book Appointment - VetConnect')
 
@@ -8,7 +8,7 @@
 </div>
 
 <div class="card" style="max-width: 600px; margin: 0 auto;">
-    <form action="{{ route('appointments.store') }}" method="POST" class="form">
+    <form action="{{ panel_route('appointments.store') }}" method="POST" class="form">
         @csrf
 
         <div class="form-group">
@@ -73,7 +73,7 @@
         </div>
 
         <div class="form-actions">
-            <a href="{{ route('appointments.index') }}" class="btn btn-outline">Cancel</a>
+            <a href="{{ panel_route('appointments.index') }}" class="btn btn-outline">Cancel</a>
             <button type="submit" class="btn btn-primary">Book Appointment</button>
         </div>
     </form>

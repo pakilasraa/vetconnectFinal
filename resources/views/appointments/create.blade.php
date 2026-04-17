@@ -10,13 +10,13 @@
             <div class="box-header">
                 <div class="box-title">Appointment Details</div>
             </div>
-            <form action="{{ route('appointments.store') }}" method="POST">
+            <form action="{{ panel_route('appointments.store') }}" method="POST">
                 @csrf
                 <div class="box-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="xl:col-span-6 col-span-12">
                             <label for="user_id" class="form-label">Pet Owner</label>
-                            @if(auth()->user()->role === 'owner')
+                            @if(auth()->user()->isPetOwner())
                                 <input type="hidden" name="user_id" value="{{ auth()->id() }}">
                                 <input type="text" class="form-control" value="{{ auth()->user()->name }}" readonly>
                             @else
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="box-footer text-end">
-                    <a href="{{ route('appointments.index') }}" class="ti-btn ti-btn-light">Cancel</a>
+                    <a href="{{ panel_route('appointments.index') }}" class="ti-btn ti-btn-light">Cancel</a>
                     <button type="submit" class="ti-btn ti-btn-primary">Book Appointment</button>
                 </div>
             </form>
