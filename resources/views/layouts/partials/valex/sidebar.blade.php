@@ -28,7 +28,7 @@
                 <!-- End::slide__category -->
 
                 <li class="slide">
-                    <a href="{{ route('dashboard') }}" class="side-menu__item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('admin.dashboard') }}" class="side-menu__item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <i class="side-menu__icon fe fe-airplay"></i>
                         <span class="side-menu__label">Dashboard</span>
                     </a>
@@ -39,56 +39,54 @@
                 <!-- End::slide__category -->
 
                 <li class="slide">
-                    <a href="{{ route('pets.index') }}" class="side-menu__item {{ request()->is('pets*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.pets.index') }}" class="side-menu__item {{ request()->is('admin/pets*') ? 'active' : '' }}">
                         <i class="side-menu__icon fe fe-github"></i>
                         <span class="side-menu__label">Pets</span>
                     </a>
                 </li>
 
                 <li class="slide">
-                    <a href="{{ route('appointments.index') }}" class="side-menu__item {{ request()->is('appointments*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.appointments.index') }}" class="side-menu__item {{ request()->is('admin/appointments*') ? 'active' : '' }}">
                         <i class="side-menu__icon fe fe-calendar"></i>
                         <span class="side-menu__label">Appointments</span>
                     </a>
                 </li>
 
                 <li class="slide has-sub">
-                    <a href="javascript:void(0);" class="side-menu__item {{ (request()->is('medical-records*') || request()->is('vaccination-records*')) ? 'active' : '' }}">
+                    <a href="javascript:void(0);" class="side-menu__item {{ (request()->is('admin/medical-records*') || request()->is('admin/vaccination-records*')) ? 'active' : '' }}">
                         <i class="side-menu__icon fe fe-file-text"></i>
                         <span class="side-menu__label">Medical Records</span>
                         <i class="fe fe-chevron-right side-menu__angle"></i>
                     </a>
                     <ul class="slide-menu child1">
                         <li class="slide">
-                            <a href="{{ route('medical-records.index') }}" class="side-menu__item {{ request()->is('medical-records*') ? 'active' : '' }}">Consultations</a>
+                            <a href="{{ route('admin.medical-records.index') }}" class="side-menu__item {{ request()->is('admin/medical-records*') ? 'active' : '' }}">Consultations</a>
                         </li>
                         <li class="slide">
-                            <a href="{{ route('vaccination-records.index') }}" class="side-menu__item {{ request()->is('vaccination-records*') ? 'active' : '' }}">Vaccinations</a>
+                            <a href="{{ route('admin.vaccination-records.index') }}" class="side-menu__item {{ request()->is('admin/vaccination-records*') ? 'active' : '' }}">Vaccinations</a>
                         </li>
                     </ul>
                 </li>
 
                 <!-- Start::slide__category -->
-                @if (auth()->user()->role !== 'owner')
-                    <li class="slide__category"><span class="category-name">Management</span></li>
-                    <!-- End::slide__category -->
+                <li class="slide__category"><span class="category-name">Management</span></li>
+                <!-- End::slide__category -->
 
-                    <li class="slide">
-                        <a href="{{ route('users.index') }}"
-                            class="side-menu__item {{ request()->routeIs('users.index') ? 'active' : '' }}">
-                            <i class="side-menu__icon fe fe-users"></i>
-                            <span class="side-menu__label">Users Management</span>
-                        </a>
-                    </li>
+                <li class="slide">
+                    <a href="{{ route('admin.users.index') }}"
+                        class="side-menu__item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <i class="side-menu__icon fe fe-users"></i>
+                        <span class="side-menu__label">Users Management</span>
+                    </a>
+                </li>
 
-                    <li class="slide">
-                        <a href="{{ route('activity-logs.index') }}"
-                            class="side-menu__item {{ request()->routeIs('activity-logs.index') ? 'active' : '' }}">
-                            <i class="side-menu__icon fe fe-activity"></i>
-                            <span class="side-menu__label">Activity Logs</span>
-                        </a>
-                    </li>
-                @endif
+                <li class="slide">
+                    <a href="{{ route('admin.activity-logs.index') }}"
+                        class="side-menu__item {{ request()->routeIs('admin.activity-logs.*') ? 'active' : '' }}">
+                        <i class="side-menu__icon fe fe-activity"></i>
+                        <span class="side-menu__label">Activity Logs</span>
+                    </a>
+                </li>
 
                 <!-- Start::slide__category -->
                 <li class="slide__category"><span class="category-name">Account</span></li>

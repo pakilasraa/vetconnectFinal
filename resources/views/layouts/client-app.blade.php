@@ -5,48 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'VetConnect - Pet Care Management')</title>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    @vite(['resources/css/client.css'])
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-container">
             <div class="header-left">
-                <button class="menu-toggle" id="menuToggle">
-                    <span>☰</span>
+                <button class="menu-toggle" id="menuToggle" type="button">
+                    <span>Menu</span>
                 </button>
-                <a href="{{ route('dashboard') }}" class="logo">
-                    <div class="logo-icon">🐾</div>
+                <a href="{{ route('client.dashboard') }}" class="logo">
+                    <div class="logo-icon">VC</div>
                     <span class="logo-text">VetConnect</span>
                 </a>
             </div>
 
             <div class="header-search">
-                <input type="text" placeholder="Search pets, appointments..." class="search-input">
+                <input type="text" placeholder="Search pets, appointments..." class="search-input" disabled>
             </div>
 
             <div class="header-right">
-                <button class="icon-btn notification-btn">
-                    🔔
-                    <span class="badge"></span>
-                </button>
-                <a href="{{ route('profile.index') }}" class="icon-btn">
-                    👤
-                </a>
+                <a href="{{ route('profile.edit') }}" class="icon-btn" title="Profile">Profile</a>
+                <form action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="icon-btn" title="Log out">Log out</button>
+                </form>
             </div>
         </div>
     </header>
 
     <div class="main-container">
-        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <p class="nav-section-title">MAIN</p>
                     <ul class="nav-list">
                         <li>
-                            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard*') ? 'active' : '' }}">
-                                📅 <span>Dashboard</span>
+                            <a href="{{ route('client.dashboard') }}" class="nav-link {{ request()->routeIs('client.dashboard') ? 'active' : '' }}">
+                                <span>Dashboard</span>
                             </a>
                         </li>
                     </ul>
@@ -56,18 +52,23 @@
                     <p class="nav-section-title">PET CARE</p>
                     <ul class="nav-list">
                         <li>
-                            <a href="{{ route('pets.index') }}" class="nav-link {{ request()->routeIs('pets*') ? 'active' : '' }}">
-                                ❤️ <span>My Pets</span>
+                            <a href="{{ route('client.pets.index') }}" class="nav-link {{ request()->routeIs('client.pets.*') ? 'active' : '' }}">
+                                <span>My Pets</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('appointments.index') }}" class="nav-link {{ request()->routeIs('appointments*') ? 'active' : '' }}">
-                                📅 <span>Appointments</span>
+                            <a href="{{ route('client.appointments.index') }}" class="nav-link {{ request()->routeIs('client.appointments.*') ? 'active' : '' }}">
+                                <span>Appointments</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('medical-records.index') }}" class="nav-link {{ request()->routeIs('medical-records*') ? 'active' : '' }}">
-                                📄 <span>Medical Records</span>
+                            <a href="{{ route('client.medical-records.index') }}" class="nav-link {{ request()->routeIs('client.medical-records.*') ? 'active' : '' }}">
+                                <span>Medical Records</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('client.vaccination-records.index') }}" class="nav-link {{ request()->routeIs('client.vaccination-records.*') ? 'active' : '' }}">
+                                <span>Vaccinations</span>
                             </a>
                         </li>
                     </ul>
@@ -77,8 +78,8 @@
                     <p class="nav-section-title">ACCOUNT</p>
                     <ul class="nav-list">
                         <li>
-                            <a href="{{ route('profile.index') }}" class="nav-link {{ request()->routeIs('profile*') ? 'active' : '' }}">
-                                👤 <span>Profile</span>
+                            <a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                                <span>Profile</span>
                             </a>
                         </li>
                     </ul>
@@ -86,20 +87,14 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="content">
             <div class="content-wrapper">
-                <!-- Flash Messages -->
                 @if(session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
+                    <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
                 @if(session('error'))
-                    <div class="alert alert-error">
-                        {{ session('error') }}
-                    </div>
+                    <div class="alert alert-error">{{ session('error') }}</div>
                 @endif
 
                 @if($errors->any())
@@ -112,26 +107,20 @@
                     </div>
                 @endif
 
-                <!-- Page Content -->
                 @yield('content')
             </div>
         </main>
     </div>
 
     <script>
-        // Mobile menu toggle
         document.getElementById('menuToggle').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('active');
         });
 
-        // Auto-hide alerts after 5 seconds
         setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
+            document.querySelectorAll('.alert').forEach(function(alert) {
                 alert.style.opacity = '0';
-                setTimeout(function() {
-                    alert.remove();
-                }, 300);
+                setTimeout(function() { alert.remove(); }, 300);
             });
         }, 5000);
     </script>
