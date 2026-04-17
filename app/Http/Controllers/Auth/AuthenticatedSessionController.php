@@ -28,13 +28,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Role-based redirection: Separate Client (owner) and Admin
-        if ($request->user()->role === 'owner') {
-            // I-redirect ang client sa client UI (palitan ang '/client' kung iba ang URL ninyo)
-            return redirect()->intended('/client');
+        if ($request->user()->isPetOwner()) {
+            return redirect()->intended(route('client.dashboard', absolute: false));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if ($request->user()->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('not-authorized', absolute: false));
     }
 
     /**
