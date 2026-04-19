@@ -5,6 +5,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClientDashboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
@@ -53,7 +54,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('/users/{id}', [ProfileController::class, 'destroyUser'])->name('users.destroy');
 
     Route::resource('pets', PetController::class);
+    Route::get('appointments/calendar', [AppointmentController::class, 'calendar'])->name('appointments.calendar');
     Route::resource('appointments', AppointmentController::class);
+    Route::resource('medicines', MedicineController::class)->except(['show']);
     Route::resource('medical-records', MedicalRecordController::class);
     Route::resource('vaccination-records', VaccinationRecordController::class);
 
@@ -64,9 +67,12 @@ Route::middleware(['auth', 'verified', 'role:pet_owner'])->prefix('client')->nam
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('pets', PetController::class);
+    Route::get('appointments/availability', [AppointmentController::class, 'clientAvailability'])->name('appointments.availability');
     Route::resource('appointments', AppointmentController::class);
     Route::patch('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
-    Route::resource('medical-records', MedicalRecordController::class)->only(['index']);
+    Route::get('medical-records', function () {
+        return redirect()->to(route('client.pets.index').'#medical-records');
+    })->name('medical-records.index');
     Route::resource('vaccination-records', VaccinationRecordController::class)->only(['index']);
 });
 
