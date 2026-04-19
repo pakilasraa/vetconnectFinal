@@ -8,7 +8,10 @@
         <h1 class="page-title">Appointments</h1>
         <p class="page-subtitle">Manage your pet's appointments</p>
     </div>
-    <a href="{{ panel_route('appointments.create') }}" class="btn btn-primary">+ Book Appointment</a>
+    <div class="page-header-actions">
+        <a href="{{ route('client.appointments.availability') }}" class="btn btn-outline">Availability calendar</a>
+        <a href="{{ panel_route('appointments.create') }}" class="btn btn-primary">+ Book Appointment</a>
+    </div>
 </div>
 
 <div class="tabs">
