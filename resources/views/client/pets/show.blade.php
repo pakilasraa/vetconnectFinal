@@ -53,7 +53,7 @@
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">Medical consultations</h2>
-        <a href="{{ route('client.medical-records.index') }}" class="link">View all</a>
+        <a href="{{ route('client.pets.index') }}#medical-records" class="link">View all pets &amp; records</a>
     </div>
     <div class="card-body" style="padding: 0;">
         @if($pet->medicalRecords->isEmpty())
