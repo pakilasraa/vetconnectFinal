@@ -17,16 +17,10 @@ class MedicalRecordController extends Controller
     {
         $user = auth()->user();
         if ($user->isPetOwner()) {
-            $records = MedicalRecord::whereHas('pet', function ($query) use ($user) {
-                $query->where('owner_id', $user->id);
-            })->with(['pet', 'vet'])->orderBy('visit_date', 'desc')->get();
-        } else {
-            $records = MedicalRecord::with(['pet', 'vet'])->orderBy('visit_date', 'desc')->get();
+            return redirect()->to(route('client.pets.index').'#medical-records');
         }
 
-        if ($request->routeIs('client.*')) {
-            return view('client.medical-records.index', compact('records'));
-        }
+        $records = MedicalRecord::with(['pet', 'vet'])->orderBy('visit_date', 'desc')->get();
 
         return view('medical-records.index', compact('records'));
     }
@@ -37,8 +31,8 @@ class MedicalRecordController extends Controller
             abort(403);
         }
 
-        $pets = \App\Models\Pet::with('owner')->get();
-        $vets = \App\Models\User::where('role', 'admin')->get();
+        $pets = \App\Models\Pet::with('owner')->orderBy('name')->get();
+        $vets = \App\Models\User::where('role', 'admin')->orderBy('name')->get();
 
         return view('medical-records.create', compact('pets', 'vets'));
     }
@@ -70,8 +64,8 @@ class MedicalRecordController extends Controller
             abort(403);
         }
 
-        $pets = \App\Models\Pet::all();
-        $vets = \App\Models\User::where('role', 'admin')->get();
+        $pets = \App\Models\Pet::with('owner')->orderBy('name')->get();
+        $vets = \App\Models\User::where('role', 'admin')->orderBy('name')->get();
 
         return view('medical-records.edit', compact('medicalRecord', 'pets', 'vets'));
     }
