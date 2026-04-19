@@ -45,11 +45,20 @@
                     </a>
                 </li>
 
-                <li class="slide">
-                    <a href="{{ route('admin.appointments.index') }}" class="side-menu__item {{ request()->is('admin/appointments*') ? 'active' : '' }}">
+                <li class="slide has-sub">
+                    <a href="javascript:void(0);" class="side-menu__item {{ request()->is('admin/appointments*') ? 'active' : '' }}">
                         <i class="side-menu__icon fe fe-calendar"></i>
                         <span class="side-menu__label">Appointments</span>
+                        <i class="fe fe-chevron-right side-menu__angle"></i>
                     </a>
+                    <ul class="slide-menu child1">
+                        <li class="slide">
+                            <a href="{{ route('admin.appointments.index') }}" class="side-menu__item {{ request()->routeIs('admin.appointments.index') || request()->routeIs('admin.appointments.create') || request()->routeIs('admin.appointments.edit') ? 'active' : '' }}">List</a>
+                        </li>
+                        <li class="slide">
+                            <a href="{{ route('admin.appointments.calendar') }}" class="side-menu__item {{ request()->routeIs('admin.appointments.calendar') ? 'active' : '' }}">Calendar</a>
+                        </li>
+                    </ul>
                 </li>
 
                 <li class="slide has-sub">
@@ -71,6 +80,14 @@
                 <!-- Start::slide__category -->
                 <li class="slide__category"><span class="category-name">Management</span></li>
                 <!-- End::slide__category -->
+
+                <li class="slide">
+                    <a href="{{ route('admin.medicines.index') }}"
+                        class="side-menu__item {{ request()->is('admin/medicines*') ? 'active' : '' }}">
+                        <i class="side-menu__icon fe fe-package"></i>
+                        <span class="side-menu__label">Medicine inventory</span>
+                    </a>
+                </li>
 
                 <li class="slide">
                     <a href="{{ route('admin.users.index') }}"
