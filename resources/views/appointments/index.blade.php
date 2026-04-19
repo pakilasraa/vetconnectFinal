@@ -18,7 +18,10 @@
                 <div class="box-title">
                     Upcoming Appointments
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <a href="{{ route('admin.appointments.calendar') }}" class="ti-btn ti-btn-secondary !py-1 !px-2 !font-medium !text-[0.75rem]">
+                        <i class="ri-calendar-2-line me-1"></i> Calendar
+                    </a>
                     <form action="{{ panel_route('appointments.index') }}" method="GET" class="flex items-center">
                         <input type="text" name="search" class="form-control form-control-sm" placeholder="Search appointments..." value="{{ request('search') }}">
                         <button type="submit" class="ti-btn ti-btn-primary !py-1 !px-2 ms-2"><i class="ri-search-line"></i></button>
@@ -48,7 +51,7 @@
                                     <td>{{ $appointment->id }}</td>
                                     <td>{{ $appointment->pet->name }}</td>
                                     <td>{{ $appointment->owner->name }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d M Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('D') }}, {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M j, Y') }}</td>
                                     <td>{{ $appointment->appointment_time }}</td>
                                     <td>{{ $appointment->service_type }}</td>
                                     <td>

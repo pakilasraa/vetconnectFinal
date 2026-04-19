@@ -23,7 +23,7 @@
                                 <select name="user_id" id="user_id" class="form-control" required>
                                     <option value="">Select Owner</option>
                                     @foreach($owners as $owner)
-                                        <option value="{{ $owner->id }}" {{ old('user_id') == $owner->id ? 'selected' : '' }}>{{ $owner->name }}</option>
+                                        <option value="{{ $owner->id }}" {{ (string) old('user_id', request('user_id')) === (string) $owner->id ? 'selected' : '' }}>{{ $owner->name }}</option>
                                     @endforeach
                                 </select>
                             @endif
@@ -33,13 +33,13 @@
                             <select name="pet_id" id="pet_id" class="form-control" required>
                                 <option value="">Select Pet</option>
                                 @foreach($pets as $pet)
-                                    <option value="{{ $pet->id }}" {{ old('pet_id') == $pet->id ? 'selected' : '' }}>{{ $pet->name }} ({{ $pet->species }})</option>
+                                    <option value="{{ $pet->id }}" {{ (string) old('pet_id', request('pet_id')) === (string) $pet->id ? 'selected' : '' }}>{{ $pet->name }} ({{ $pet->species }})</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="xl:col-span-6 col-span-12">
                             <label for="appointment_date" class="form-label">Appointment Date</label>
-                            <input type="date" name="appointment_date" id="appointment_date" class="form-control" required value="{{ old('appointment_date') }}">
+                            <input type="date" name="appointment_date" id="appointment_date" class="form-control" required value="{{ old('appointment_date', request('date')) }}" min="{{ date('Y-m-d') }}">
                         </div>
                         <div class="xl:col-span-6 col-span-12">
                             <label for="appointment_time" class="form-label">Appointment Time</label>
