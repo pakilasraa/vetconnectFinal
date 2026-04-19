@@ -88,7 +88,7 @@
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">Recent Medical Records</h2>
-        <a href="{{ panel_route('medical-records.index') }}" class="link">View All</a>
+        <a href="{{ route('client.pets.index') }}#medical-records" class="link">View All</a>
     </div>
     <div class="card-body">
         @if($recentRecords->count() > 0)

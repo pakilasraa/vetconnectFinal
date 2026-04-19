@@ -31,7 +31,7 @@
                     <tbody>
                         @foreach($records as $record)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($record->visit_date)->format('M d, Y') }}</td>
+                                <td>{{ $record->visit_date->format('D') }}, {{ $record->visit_date->format('M j, Y') }}</td>
                                 <td>
                                     <a href="{{ panel_route('pets.show', $record->pet_id) }}">{{ $record->pet->name }}</a>
                                 </td>
