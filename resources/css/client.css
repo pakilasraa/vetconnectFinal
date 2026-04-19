@@ -299,6 +299,158 @@ button.icon-btn {
     font-size: 0.9375rem;
 }
 
+.page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.client-section-anchor {
+    scroll-margin-top: calc(var(--client-header-h) + 1rem);
+}
+
+/* Booking availability calendar */
+.avail-legend-card .card-body {
+    padding-bottom: 0.5rem;
+}
+
+.avail-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    font-size: 0.875rem;
+    color: var(--client-text);
+}
+
+.avail-dot {
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+}
+
+.avail-dot-available { background: #10b981; }
+.avail-dot-full { background: #ef4444; }
+.avail-dot-past { background: #94a3b8; }
+
+.avail-note {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+}
+
+.avail-cal-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.avail-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.avail-cal {
+    border-top: 1px solid var(--client-border);
+}
+
+.avail-cal-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-bottom: 1px solid var(--client-border);
+}
+
+.avail-cal-head {
+    background: #fafbfc;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--client-muted);
+}
+
+.avail-cal-cell {
+    min-height: 4.5rem;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    border-right: 1px solid var(--client-border);
+    text-decoration: none;
+    color: inherit;
+    box-sizing: border-box;
+}
+
+.avail-cal-row .avail-cal-cell:last-child {
+    border-right: none;
+}
+
+.avail-cal-dow {
+    min-height: auto;
+    padding: 0.65rem 0.5rem;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.avail-cal-dlabel {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--client-muted);
+}
+
+.avail-cal-num {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.avail-cal-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.avail-cal-sub {
+    font-size: 0.65rem;
+    color: var(--client-muted);
+}
+
+.avail-cal-muted {
+    background: #f8fafc;
+    color: #cbd5e1;
+}
+
+.avail-cal-past {
+    background: #f1f5f9;
+    color: var(--client-muted);
+}
+
+.avail-cal-full {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.avail-cal-open {
+    background: #ecfdf5;
+    color: #065f46;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.avail-cal-open:hover {
+    background: #d1fae5;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
 /* Stats */
 .stats-grid {
     display: grid;
