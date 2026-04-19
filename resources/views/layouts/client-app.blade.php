@@ -57,13 +57,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('client.appointments.index') }}" class="nav-link {{ request()->routeIs('client.appointments.*') ? 'active' : '' }}">
+                            <a href="{{ route('client.appointments.index') }}" class="nav-link {{ request()->routeIs('client.appointments.index') || request()->routeIs('client.appointments.create') || request()->routeIs('client.appointments.edit') || request()->routeIs('client.appointments.cancel') ? 'active' : '' }}">
                                 <span>Appointments</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('client.medical-records.index') }}" class="nav-link {{ request()->routeIs('client.medical-records.*') ? 'active' : '' }}">
-                                <span>Medical Records</span>
+                            <a href="{{ route('client.appointments.availability') }}" class="nav-link {{ request()->routeIs('client.appointments.availability') ? 'active' : '' }}">
+                                <span>Availability</span>
                             </a>
                         </li>
                         <li>
