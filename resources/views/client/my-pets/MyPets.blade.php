@@ -56,4 +56,46 @@
         <a href="{{ panel_route('pets.create') }}" class="btn btn-primary">Add Pet</a>
     </div>
 @endif
+
+<section id="medical-records" class="client-section-anchor">
+    <div class="page-header" style="margin-top: 2.5rem;">
+        <div>
+            <h2 class="page-title" style="font-size: 1.35rem;">Medical consultations</h2>
+            <p class="page-subtitle">Consultation history for all your pets</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding: 0;">
+            @if($medicalRecords->isEmpty())
+                <p class="text-muted" style="padding: 1.25rem;">No medical records yet.</p>
+            @else
+                <div class="client-table-wrap">
+                    <table class="client-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Pet</th>
+                                <th scope="col">Diagnosis</th>
+                                <th scope="col">Veterinarian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($medicalRecords as $record)
+                                <tr>
+                                    <td>{{ $record->visit_date->format('D') }}, {{ $record->visit_date->format('M j, Y') }}</td>
+                                    <td>
+                                        <a href="{{ panel_route('pets.show', $record->pet_id) }}">{{ $record->pet->name }}</a>
+                                    </td>
+                                    <td>{{ \Illuminate\Support\Str::limit($record->diagnosis, 80) }}</td>
+                                    <td>{{ $record->vet->name }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+</section>
 @endsection
