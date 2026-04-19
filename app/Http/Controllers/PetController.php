@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\RedirectsToPanelRoute;
 use App\Models\ActivityLog;
+use App\Models\MedicalRecord;
 use App\Models\Pet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,8 +35,14 @@ class PetController extends Controller
 
         if ($request->routeIs('client.pets.*')) {
             $pets = $query->latest()->get();
+            $medicalRecords = MedicalRecord::query()
+                ->whereHas('pet', fn ($q) => $q->where('owner_id', $request->user()->id))
+                ->with(['pet', 'vet'])
+                ->orderByDesc('visit_date')
+                ->limit(100)
+                ->get();
 
-            return view('client.my-pets.MyPets', compact('pets'));
+            return view('client.my-pets.MyPets', compact('pets', 'medicalRecords'));
         }
 
         $pets = $query->paginate(10);
@@ -88,7 +95,7 @@ class PetController extends Controller
             return $redirect;
         }
 
-        $pet->load(['owner', 'medicalRecords.vet', 'vaccinationRecords', 'appointments']);
+        $pet->load(['owner', 'appointments']);
 
         if ($request->routeIs('client.pets.*')) {
             return view('client.pets.show', compact('pet'));
