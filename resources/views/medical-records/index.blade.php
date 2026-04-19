@@ -33,7 +33,7 @@
                         <tbody>
                             @forelse ($records as $record)
                                 <tr class="border-b border-defaultborder">
-                                    <td>{{ \Carbon\Carbon::parse($record->visit_date)->format('M d, Y') }}</td>
+                                    <td>{{ $record->visit_date->format('D') }}, {{ $record->visit_date->format('M j, Y') }}</td>
                                     <td><a href="{{ panel_route('pets.show', $record->pet_id) }}" class="text-primary font-medium">{{ $record->pet->name }}</a></td>
                                     <td>{{ Str::limit($record->diagnosis, 50) }}</td>
                                     <td>{{ $record->vet->name }}</td>
