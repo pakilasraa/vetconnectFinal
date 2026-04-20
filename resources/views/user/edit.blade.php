@@ -18,7 +18,7 @@
 
                 </div>
 
-                <form action="{{route('users.update', $user->id)}}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.users.update', $user->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="_method" value="PUT">
@@ -56,10 +56,8 @@
                         <div class="xl:col-span-4 lf:col-span-6 md:col-span-6 sm:col-span-12 col-span-12">
                             <label for="input-role" class="form-label">Role</label>
                             <select name="role" id="input-role" class="form-control" required>
-                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="staff" {{ $user->role == 'staff' ? 'selected' : '' }}>Staff</option>
-                                <option value="vet" {{ $user->role == 'vet' ? 'selected' : '' }}>Vet</option>
-                                <option value="owner" {{ $user->role == 'owner' ? 'selected' : '' }}>Owner</option>
+                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Administrator</option>
+                                <option value="pet_owner" {{ in_array($user->role, ['pet_owner', 'owner'], true) ? 'selected' : '' }}>Pet owner</option>
                             </select>
                         </div>
 

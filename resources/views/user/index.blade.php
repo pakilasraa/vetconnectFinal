@@ -14,7 +14,7 @@
                     Users List
                 </div>
                 <div class="prism-toggle">
-                    <a href="{{ route('users.create') }}" class="ti-btn !py-1 !px-2 ti-btn-primary !font-medium !text-[0.75rem]">New
+                    <a href="{{ route('admin.users.create') }}" class="ti-btn !py-1 !px-2 ti-btn-primary !font-medium !text-[0.75rem]">New
                         User<i class="ri-add-circle-line ms-2 inline-block align-middle"></i></a>
                 </div>
             </div>
@@ -52,12 +52,12 @@
                                         
                                     
                                         <div class="flex items-center gap-2">
-                                            <a href="{{ route('users.edit', $user->id) }}"
+                                            <a href="{{ route('admin.users.edit', $user->id) }}"
                                                 class="text-info text-[.875rem] leading-none">
                                                 <i class="ri-edit-line"></i>
                                             </a>
                             
-                                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline">
+                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-danger text-[.875rem] leading-none" onclick="return confirm('Are you sure you want to delete this user?')">

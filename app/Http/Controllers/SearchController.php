@@ -28,14 +28,13 @@ class SearchController extends Controller
               ->orWhere('breed', 'like', "%{$query}%");
         });
 
-        // Search Owners (Users with role 'owner')
-        $ownerQuery = User::where('role', 'owner')->where(function($q) use ($query) {
+        // Search pet owners
+        $ownerQuery = User::where('role', 'pet_owner')->where(function ($q) use ($query) {
             $q->where('name', 'like', "%{$query}%")
-              ->orWhere('email', 'like', "%{$query}%");
+                ->orWhere('email', 'like', "%{$query}%");
         });
 
-        // Apply role-based filtering
-        if ($user->role === 'owner') {
+        if ($user->isPetOwner()) {
             // Owners can only see their own pets and themselves
             $petQuery->where('owner_id', $user->id);
             $ownerQuery->where('id', $user->id);

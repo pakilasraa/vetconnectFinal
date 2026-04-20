@@ -343,7 +343,7 @@
                                     <td class="">{{ $consultation->vet->name }}</td>
                                     <td class="">{{ Carbon\Carbon::parse($consultation->visit_date)->format('d M Y') }}</td>
                                     <td class=" text-[0.925rem]"><span class="badge leading-none bg-primary/10 !text-primary rounded-sm py-1">Completed</span></td>
-                                    <td class=""> <a href="{{ route('medical-records.show', $consultation->id) }}" class="text-primary font-medium">View Result</a></td>
+                                    <td class=""> <a href="{{ route('admin.medical-records.edit', $consultation->id) }}" class="text-primary font-medium">View Result</a></td>
                                 </tr>
                             @empty
                                 <tr>
@@ -422,8 +422,8 @@
                                     <td>#PET-{{ $pet->id }}</td>
                                     <td><span class="truncate whitespace-nowrap inline-block badge !rounded-full text-xs font-medium bg-primary/10 text-primary">Registered</span> </td>
                                     <td class="font-medium space-x-2 rtl:space-x-reverse">
-                                        <a href="{{ route('pets.show', $pet->id) }}" class="ti-btn ti-btn-soft-primary !border !border-primary/20"><i class="ti ti-eye"></i> </a>
-                                        <a href="{{ route('pets.edit', $pet->id) }}" class="ti-btn ti-btn-soft-info !border !border-info/20"><i class="ti ti-pencil"></i> </a>
+                                        <a href="{{ route('admin.pets.show', $pet->id) }}" class="ti-btn ti-btn-soft-primary !border !border-primary/20"><i class="ti ti-eye"></i> </a>
+                                        <a href="{{ route('admin.pets.edit', $pet->id) }}" class="ti-btn ti-btn-soft-info !border !border-info/20"><i class="ti ti-pencil"></i> </a>
                                     </td>
                                 </tr>
                             @empty

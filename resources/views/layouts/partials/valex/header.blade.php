@@ -24,7 +24,7 @@
           <a aria-label="Hide Sidebar"
             class="sidemenu-toggle animated-arrow header-link  hor-toggle horizontal-navtoggle inline-flex items-center"
             href="javascript:void(0);"><i class="header-icon fe fe-align-left"></i></a>
-          <form action="{{ route('search') }}" method="GET" class="main-header-center hidden lg:block">
+          <form action="{{ route('admin.search') }}" method="GET" class="main-header-center hidden lg:block">
             <input
               name="query"
               class="form-control placeholder:!text-headerprimecolor placeholder:opacity-70 placeholder:font-thin placeholder:text-sm"
@@ -47,7 +47,7 @@
             </svg> </a>
 
             <div class="hs-dropdown-menu ti-dropdown-menu hidden" aria-labelledby="hs-dropdown-auto-close-inside">
-              <form action="{{ route('search') }}" method="GET">
+              <form action="{{ route('admin.search') }}" method="GET">
                 <div class="input-group w-full p-2"> 
                   <input type="text" name="query" class="form-control" placeholder="Search...." value="{{ request('query') }}">
                   <button type="submit" class="ti-btn ti-btn-primary-full !mb-0"> <i class="fa fa-search" aria-hidden="true"></i> </button>

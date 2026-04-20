@@ -31,11 +31,11 @@
                                 <tbody>
                                     @foreach($pets as $pet)
                                         <tr class="border-b border-defaultborder">
-                                            <td><a href="{{ route('pets.show', $pet->id) }}" class="text-primary font-medium">{{ $pet->name }}</a></td>
+                                            <td><a href="{{ route('admin.pets.show', $pet->id) }}" class="text-primary font-medium">{{ $pet->name }}</a></td>
                                             <td>{{ $pet->owner->name }}</td>
                                             <td>{{ $pet->species }} ({{ $pet->breed ?? 'Unknown' }})</td>
                                             <td>
-                                                <a href="{{ route('pets.show', $pet->id) }}" class="ti-btn ti-btn-sm ti-btn-primary">View</a>
+                                                <a href="{{ route('admin.pets.show', $pet->id) }}" class="ti-btn ti-btn-sm ti-btn-primary">View</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -48,7 +48,7 @@
                 </div>
 
                 {{-- Owners Section (Admin/Staff only) --}}
-                @if(auth()->user()->role !== 'owner')
+                @if(auth()->user()->isAdmin())
                     <div>
                         <h5 class="text-[0.875rem] font-semibold mb-3 flex items-center gap-2">
                             <i class="fa fa-user text-secondary"></i> Owners/Users ({{ $owners->count() }})
@@ -69,7 +69,7 @@
                                                 <td>{{ $owner->name }}</td>
                                                 <td>{{ $owner->email }}</td>
                                                 <td>
-                                                    <a href="{{ route('users.edit', $owner->id) }}" class="ti-btn ti-btn-sm ti-btn-secondary">Edit User</a>
+                                                    <a href="{{ route('admin.users.edit', $owner->id) }}" class="ti-btn ti-btn-sm ti-btn-secondary">Edit User</a>
                                                 </td>
                                             </tr>
                                         @endforeach

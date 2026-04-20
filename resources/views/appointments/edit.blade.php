@@ -10,7 +10,7 @@
             <div class="box-header">
                 <div class="box-title">Appointment Details</div>
             </div>
-            <form action="{{ route('appointments.update', $appointment->id) }}" method="POST">
+            <form action="{{ panel_route('appointments.update', $appointment->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="box-body">
@@ -68,7 +68,7 @@
                     </div>
                 </div>
                 <div class="box-footer text-end">
-                    <a href="{{ route('appointments.index') }}" class="ti-btn ti-btn-light">Cancel</a>
+                    <a href="{{ panel_route('appointments.index') }}" class="ti-btn ti-btn-light">Cancel</a>
                     <button type="submit" class="ti-btn ti-btn-primary">Update Appointment</button>
                 </div>
             </form>
