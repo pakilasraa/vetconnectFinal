@@ -187,6 +187,10 @@ class AppointmentController extends Controller
             $owners = \App\Models\User::where('role', 'pet_owner')->get();
         }
 
+        if ($request->routeIs('client.appointments.*')) {
+            return view('client.client-appointment.CreateAppointment', compact('pets', 'owners'));
+        }
+
         return view('appointments.create', compact('pets', 'owners'));
     }
 
@@ -244,6 +248,10 @@ class AppointmentController extends Controller
         } else {
             $owners = \App\Models\User::where('role', 'pet_owner')->get();
             $pets = \App\Models\Pet::all();
+        }
+
+        if ($request->routeIs('client.appointments.*')) {
+            return view('client.client-appointment.EditAppointment', compact('appointment', 'owners', 'pets'));
         }
 
         return view('appointments.edit', compact('appointment', 'owners', 'pets'));
