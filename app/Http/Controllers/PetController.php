@@ -41,8 +41,14 @@ class PetController extends Controller
                 ->orderByDesc('visit_date')
                 ->limit(100)
                 ->get();
+            
+            $vaccinationRecords = \App\Models\VaccinationRecord::query()
+                ->whereHas('pet', fn ($q) => $q->where('owner_id', $request->user()->id))
+                ->with(['pet'])
+                ->orderByDesc('administered_date')
+                ->get();
 
-            return view('client.my-pets.MyPets', compact('pets', 'medicalRecords'));
+            return view('client.my-pets.MyPets', compact('pets', 'medicalRecords', 'vaccinationRecords'));
         }
 
         $pets = $query->paginate(10);
@@ -53,6 +59,9 @@ class PetController extends Controller
     public function create(Request $request): View
     {
         if ($request->user()->isPetOwner()) {
+            if ($request->routeIs('client.pets.*')) {
+                return view('client.pets.create');
+            }
             return view('pets.create', ['owners' => collect()]);
         }
 
@@ -111,6 +120,9 @@ class PetController extends Controller
         }
 
         if ($request->user()->isPetOwner()) {
+            if ($request->routeIs('client.pets.*')) {
+                return view('client.pets.edit', compact('pet'));
+            }
             return view('pets.edit', ['pet' => $pet, 'owners' => collect()]);
         }
 

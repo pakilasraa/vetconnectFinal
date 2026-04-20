@@ -98,4 +98,52 @@
         </div>
     </div>
 </section>
+
+<section id="vaccination-records" class="client-section-anchor">
+    <div class="page-header" style="margin-top: 2.5rem;">
+        <div>
+            <h2 class="page-title" style="font-size: 1.35rem;">Vaccination records</h2>
+            <p class="page-subtitle">Vaccination history for all your pets</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding: 0;">
+            @if($vaccinationRecords->isEmpty())
+                <p class="text-muted" style="padding: 1.25rem;">No vaccination records yet.</p>
+            @else
+                <div class="client-table-wrap">
+                    <table class="client-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Pet</th>
+                                <th scope="col">Vaccine</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Next Due</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($vaccinationRecords as $v_record)
+                                <tr>
+                                    <td>{{ $v_record->administered_date->format('D') }}, {{ $v_record->administered_date->format('M j, Y') }}</td>
+                                    <td>
+                                        <a href="{{ panel_route('pets.show', $v_record->pet_id) }}">{{ $v_record->pet->name }}</a>
+                                    </td>
+                                    <td>{{ $v_record->vaccine_name }}</td>
+                                    <td>
+                                        <span class="badge {{ $v_record->status === 'given' ? 'badge-blue' : 'badge-purple' }}">
+                                            {{ ucfirst($v_record->status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $v_record->due_date ? $v_record->due_date->format('M j, Y') : 'N/A' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+</section>
 @endsection

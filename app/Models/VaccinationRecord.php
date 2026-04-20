@@ -14,6 +14,11 @@ class VaccinationRecord extends Model
         'status',
     ];
 
+    protected $casts = [
+        'administered_date' => 'date',
+        'due_date' => 'date',
+    ];
+
     public function pet()
     {
         return $this->belongsTo(Pet::class);
