@@ -980,17 +980,22 @@ button.icon-btn {
 
 /* Forms */
 .form {
-    padding: 0.25rem 0;
+    padding: 1.5rem;
 }
 
-.form-row {
+.form-row,
+.form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
 }
 
 .form-label {
@@ -998,7 +1003,7 @@ button.icon-btn {
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--client-text);
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.5rem;
 }
 
 .form-input,
@@ -1022,8 +1027,12 @@ button.icon-btn {
 .form-actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
     gap: 0.75rem;
-    margin-top: 1.25rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--client-border);
 }
 
 .filters-form .form-row {

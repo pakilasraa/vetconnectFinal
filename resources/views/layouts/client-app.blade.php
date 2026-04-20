@@ -66,11 +66,6 @@
                                 <span>Availability</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="{{ route('client.vaccination-records.index') }}" class="nav-link {{ request()->routeIs('client.vaccination-records.*') ? 'active' : '' }}">
-                                <span>Vaccinations</span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
 
