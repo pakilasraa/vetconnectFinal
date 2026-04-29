@@ -1,7 +1,5 @@
 @extends('layouts.valex')
 @section('page-title', 'Book Appointment')
-@section('breadcrumb-parent', 'Appointment Management')
-@section('breadcrumb-child', 'Book')
 
 @section('content')
     <div class="xl:col-span-12 col-span-12">
@@ -33,7 +31,13 @@
                             <select name="pet_id" id="pet_id" class="form-control" required>
                                 <option value="">Select Pet</option>
                                 @foreach($pets as $pet)
-                                    <option value="{{ $pet->id }}" {{ (string) old('pet_id', request('pet_id')) === (string) $pet->id ? 'selected' : '' }}>{{ $pet->name }} ({{ $pet->species }})</option>
+                                    <option
+                                        value="{{ $pet->id }}"
+                                        data-owner-id="{{ $pet->owner_id }}"
+                                        {{ (string) old('pet_id', request('pet_id')) === (string) $pet->id ? 'selected' : '' }}
+                                    >
+                                        {{ $pet->name }} ({{ $pet->species }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -43,7 +47,18 @@
                         </div>
                         <div class="xl:col-span-6 col-span-12">
                             <label for="appointment_time" class="form-label">Appointment Time</label>
-                            <input type="time" name="appointment_time" id="appointment_time" class="form-control" required value="{{ old('appointment_time') }}">
+                            <select name="appointment_time" id="appointment_time" class="form-control" required>
+                                <option value="">Select time</option>
+                                @foreach(\App\Support\AppointmentSlots::times() as $time)
+                                    @php
+                                        $timeObj = \Carbon\Carbon::createFromFormat('H:i:s', $time);
+                                    @endphp
+                                    <option value="{{ $time }}" {{ old('appointment_time') == $time ? 'selected' : '' }}>
+                                        {{ $timeObj->format('g:i A') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p id="appointment_time_hint" class="text-muted mt-1 mb-0" style="font-size: 12px;"></p>
                             @error('appointment_time')
                                 <p class="text-danger mt-1">{{ $message }}</p>
                             @enderror
@@ -72,4 +87,117 @@
             </form>
         </div>
     </div>
+
+    @if(!auth()->user()->isPetOwner())
+        <script>
+            (function () {
+                const ownerSelect = document.getElementById('user_id');
+                const petSelect = document.getElementById('pet_id');
+                if (!ownerSelect || !petSelect) return;
+
+                const petOptions = Array.from(petSelect.options).filter((option) => option.value !== '');
+                const defaultOption = petSelect.querySelector('option[value=""]');
+
+                function filterPets() {
+                    const ownerId = ownerSelect.value;
+                    const selectedPet = petSelect.value;
+
+                    petOptions.forEach((option) => {
+                        const shouldShow = !ownerId || option.dataset.ownerId === ownerId;
+                        option.hidden = !shouldShow;
+                        option.disabled = !shouldShow;
+                    });
+
+                    if (selectedPet) {
+                        const selectedOption = petOptions.find((option) => option.value === selectedPet);
+                        if (selectedOption && (selectedOption.hidden || selectedOption.disabled)) {
+                            petSelect.value = '';
+                        }
+                    }
+
+                    if (defaultOption) {
+                        defaultOption.textContent = ownerId ? 'Select Pet' : 'Select Owner first';
+                    }
+                }
+
+                ownerSelect.addEventListener('change', filterPets);
+                filterPets();
+            })();
+        </script>
+    @endif
+
+    <script>
+        (function () {
+            const dateInput = document.getElementById('appointment_date');
+            const timeSelect = document.getElementById('appointment_time');
+            const hint = document.getElementById('appointment_time_hint');
+            if (!dateInput || !timeSelect) return;
+
+            const options = Array.from(timeSelect.options).filter((option) => option.value !== '');
+
+            function toApiDate(value) {
+                if (!value) return '';
+                if (value.includes('-')) return value;
+                const parts = value.split('/');
+                if (parts.length === 3) {
+                    return [parts[2], parts[1], parts[0]].join('-');
+                }
+                return value;
+            }
+
+            function updateTimeHint(bookedCount) {
+                if (!hint) return;
+                if (!dateInput.value) {
+                    hint.textContent = 'Select a date to see which time slots are already taken.';
+                    return;
+                }
+                hint.textContent = bookedCount > 0
+                    ? `${bookedCount} slot(s) already taken for this day.`
+                    : 'All time slots are currently open for this day.';
+            }
+
+            async function refreshBookedSlots() {
+                const selectedDate = toApiDate(dateInput.value);
+                options.forEach((option) => {
+                    option.disabled = false;
+                    option.textContent = option.textContent.replace(' (Taken)', '');
+                });
+
+                if (!selectedDate) {
+                    updateTimeHint(0);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`{{ route('admin.appointments.booked-slots') }}?date=${encodeURIComponent(selectedDate)}`);
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+                    const booked = new Set((data.booked || []).map(String));
+                    let bookedCount = 0;
+
+                    options.forEach((option) => {
+                        if (booked.has(option.value)) {
+                            bookedCount++;
+                            option.disabled = true;
+                            if (!option.textContent.includes(' (Taken)')) {
+                                option.textContent = `${option.textContent} (Taken)`;
+                            }
+                        }
+                    });
+
+                    if (timeSelect.value && timeSelect.selectedOptions[0]?.disabled) {
+                        timeSelect.value = '';
+                    }
+
+                    updateTimeHint(bookedCount);
+                } catch (error) {
+                    updateTimeHint(0);
+                }
+            }
+
+            dateInput.addEventListener('change', refreshBookedSlots);
+            refreshBookedSlots();
+        })();
+    </script>
 @endsection
