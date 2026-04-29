@@ -1,7 +1,5 @@
 @extends('layouts.valex')
 @section('page-title', 'Pet Management')
-@section('breadcrumb-parent', 'Patient Records')
-@section('breadcrumb-child', 'Index')
 
 @section('content')
 
