@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     Route::resource('pets', PetController::class);
     Route::get('appointments/calendar', [AppointmentController::class, 'calendar'])->name('appointments.calendar');
+    Route::get('appointments/booked-slots', [AppointmentController::class, 'bookedSlots'])->name('appointments.booked-slots');
     Route::resource('appointments', AppointmentController::class);
     Route::resource('medicines', MedicineController::class)->except(['show']);
     Route::resource('medical-records', MedicalRecordController::class);
@@ -68,6 +69,7 @@ Route::middleware(['auth', 'verified', 'role:pet_owner'])->prefix('client')->nam
 
     Route::resource('pets', PetController::class);
     Route::get('appointments/availability', [AppointmentController::class, 'clientAvailability'])->name('appointments.availability');
+    Route::get('appointments/booked-slots', [AppointmentController::class, 'bookedSlots'])->name('appointments.booked-slots');
     Route::resource('appointments', AppointmentController::class);
     Route::patch('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::get('medical-records', function () {

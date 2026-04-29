@@ -1,7 +1,5 @@
 @extends('layouts.valex')
 @section('page-title', 'Users Management')
-@section('breadcrumb-parent', 'User Management')
-@section('breadcrumb-child', 'Index')
 
 @section('content')
 
