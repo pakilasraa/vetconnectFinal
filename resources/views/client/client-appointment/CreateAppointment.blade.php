@@ -12,6 +12,10 @@
         @csrf
 
         <div class="form-group">
+            <p id="selected_date_display" class="text-muted mb-0">Selected date: Please choose a date.</p>
+        </div>
+
+        <div class="form-group">
             <label for="pet_id" class="form-label">Select Pet *</label>
             <select id="pet_id" name="pet_id" class="form-input" required>
                 <option value="">Choose a pet</option>
@@ -41,7 +45,7 @@
             <div class="form-group">
                 <label for="appointment_date" class="form-label">Date *</label>
                 <input type="date" id="appointment_date" name="appointment_date"
-                       value="{{ old('appointment_date') }}"
+                       value="{{ old('appointment_date', request('date')) }}"
                        min="{{ date('Y-m-d') }}"
                        class="form-input" required>
                 @error('appointment_date') <p class="text-error mt-1">{{ $message }}</p> @enderror
@@ -61,6 +65,7 @@
                         </option>
                     @endforeach
                 </select>
+                <p id="appointment_time_hint" class="text-muted mt-1 mb-0" style="font-size: 12px;"></p>
                 @error('appointment_time') <p class="text-error mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
@@ -77,4 +82,96 @@
         </div>
     </form>
 </div>
+
+<script>
+    (function () {
+        const dateInput = document.getElementById('appointment_date');
+        const timeSelect = document.getElementById('appointment_time');
+        const selectedDateDisplay = document.getElementById('selected_date_display');
+        const timeHint = document.getElementById('appointment_time_hint');
+        if (!dateInput || !timeSelect) return;
+
+        const options = Array.from(timeSelect.options).filter((option) => option.value !== '');
+        options.forEach((option) => {
+            option.dataset.baseLabel = option.textContent.trim();
+        });
+
+        function updateSelectedDateDisplay() {
+            if (!selectedDateDisplay) return;
+            if (!dateInput.value) {
+                selectedDateDisplay.textContent = 'Selected date: Please choose a date.';
+                return;
+            }
+
+            const date = new Date(dateInput.value + 'T00:00:00');
+            const prettyDate = date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            selectedDateDisplay.textContent = `Selected date: ${prettyDate}`;
+        }
+
+        function resetTimeOptions() {
+            options.forEach((option) => {
+                option.disabled = false;
+                option.textContent = `${option.dataset.baseLabel} - Available`;
+            });
+        }
+
+        function updateTimeHint(bookedCount, selectedDate) {
+            if (!timeHint) return;
+            if (!selectedDate) {
+                timeHint.textContent = 'Pick a date to load available time slots.';
+                return;
+            }
+            timeHint.textContent = bookedCount > 0
+                ? `${bookedCount} slot(s) are already taken on this date.`
+                : 'All time slots are available on this date.';
+        }
+
+        async function refreshBookedSlots() {
+            const selectedDate = dateInput.value;
+            updateSelectedDateDisplay();
+            resetTimeOptions();
+
+            if (!selectedDate) {
+                updateTimeHint(0, selectedDate);
+                return;
+            }
+
+            try {
+                const response = await fetch(`{{ panel_route('appointments.booked-slots') }}?date=${encodeURIComponent(selectedDate)}`);
+                if (!response.ok) {
+                    updateTimeHint(0, selectedDate);
+                    return;
+                }
+
+                const data = await response.json();
+                const booked = new Set((data.booked || []).map(String));
+                let bookedCount = 0;
+
+                options.forEach((option) => {
+                    if (booked.has(option.value)) {
+                        option.disabled = true;
+                        option.textContent = `${option.dataset.baseLabel} - Taken`;
+                        bookedCount++;
+                    }
+                });
+
+                if (timeSelect.value && timeSelect.selectedOptions[0]?.disabled) {
+                    timeSelect.value = '';
+                }
+
+                updateTimeHint(bookedCount, selectedDate);
+            } catch (error) {
+                updateTimeHint(0, selectedDate);
+            }
+        }
+
+        dateInput.addEventListener('change', refreshBookedSlots);
+        refreshBookedSlots();
+    })();
+</script>
 @endsection
