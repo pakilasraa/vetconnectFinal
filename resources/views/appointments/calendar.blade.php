@@ -1,134 +1,137 @@
 @extends('layouts.valex')
 @section('page-title', 'Appointment calendar')
-@section('breadcrumb-parent', 'Appointments')
-@section('breadcrumb-child', 'Full calendar')
-
-@section('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/main.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.11/main.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.11/main.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/list@6.1.11/main.min.css">
-    <style>
-        #appointment-calendar { min-height: 38rem; }
-        .fc .appointment-cancelled { opacity: 0.65; text-decoration: line-through !important; }
-        .fc .fc-toolbar-title { font-size: 1.1rem; }
-    </style>
-@endsection
 
 @section('content')
-    <div class="grid grid-cols-12 gap-x-6">
-        <div class="xl:col-span-3 col-span-12">
-            <div class="box custom-box">
-                <div class="py-4 px-[1.25rem] border-b dark:border-defaultborder/10 !grid">
-                    <a href="{{ route('admin.appointments.create') }}" class="ti-btn ti-btn-soft-primary text-center">
-                        <i class="ri-add-line align-middle me-1 font-semibold inline-block"></i>New appointment
-                    </a>
-                </div>
-                <div class="box-body !p-0">
-                    <div class="border-b dark:border-defaultborder/10 p-4">
-                        <p class="text-textmuted text-[0.8125rem] mb-0">
-                            Legend for common visit types. Appointments on the calendar come from your database; use <strong>New appointment</strong> or the list view to add or edit bookings.
-                        </p>
-                    </div>
-                    <div id="external-events" class="border-b dark:border-defaultborder/10 p-4 space-y-2">
-                        <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event !bg-primary border !border-primary rounded px-2 py-1 text-sm">
-                            <div class="fc-event-main">Consultation</div>
-                        </div>
-                        <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event !bg-secondary border !border-secondary rounded px-2 py-1 text-sm">
-                            <div class="fc-event-main">Vaccination</div>
-                        </div>
-                        <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event !bg-success border !border-success rounded px-2 py-1 text-sm">
-                            <div class="fc-event-main">Follow-up</div>
-                        </div>
-                        <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event !bg-info border !border-info rounded px-2 py-1 text-sm">
-                            <div class="fc-event-main">Grooming</div>
-                        </div>
-                    </div>
-                    <div class="dark:border-defaultborder/10">
-                        <div class="flex items-center mb-4 p-4 !pb-0 justify-between">
-                            <h6 class="font-semibold mb-0">Upcoming activity</h6>
-                            <a href="{{ route('admin.appointments.index') }}" class="ti-btn !py-1 !px-2 !text-[0.75rem] ti-btn-primary btn-wave">List view</a>
-                        </div>
-                        <ul class="list-none mb-0 !p-4 !pt-0 fullcalendar-events-activity" id="full-calendar-activity">
-                            @forelse ($activity as $appt)
-                                @php
-                                    $dt = \Carbon\Carbon::parse($appt->appointment_date);
-                                    $tm = \Carbon\Carbon::parse($appt->appointment_time);
-                                @endphp
-                                <li class="{{ !$loop->last ? 'mb-4 pb-4 border-b border-defaultborder dark:border-defaultborder/10' : '' }}">
-                                    <div class="flex items-center justify-between flex-wrap gap-2">
-                                        <p class="mb-1 font-semibold text-[0.875rem]">
-                                            {{ $dt->translatedFormat('l') }}, {{ $dt->translatedFormat('M j, Y') }}
-                                        </p>
-                                        <span class="badge bg-light text-default mb-1">{{ $tm->format('g:i A') }}</span>
-                                    </div>
-                                    <p class="mb-1 text-[0.8125rem] font-medium">
-                                        <a href="{{ route('admin.appointments.edit', $appt) }}" class="text-primary">{{ $appt->pet->name }}</a>
-                                        — {{ $appt->service_type }}
-                                    </p>
-                                    <p class="mb-0 text-muted text-[0.75rem]">
-                                        {{ $appt->owner->name }}
-                                        <span class="badge {{ $appt->status === 'confirmed' ? 'bg-success/10 text-success' : ($appt->status === 'cancelled' ? 'bg-danger/10 text-danger' : 'bg-info/10 text-info') }} ms-1">{{ ucfirst($appt->status) }}</span>
-                                    </p>
-                                </li>
-                            @empty
-                                <li class="text-textmuted text-sm">No appointments in the loaded range.</li>
-                            @endforelse
-                        </ul>
-                    </div>
-                </div>
+    <style>
+        .client-look {
+            --client-bg: #f0f4f8;
+            --client-surface: #ffffff;
+            --client-border: #e2e8f0;
+            --client-text: #1e293b;
+            --client-muted: #64748b;
+            --client-primary: #0d9488;
+            --client-primary-hover: #0f766e;
+            --client-primary-soft: rgba(13, 148, 136, 0.12);
+        }
+        .client-look .page-header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+        .client-look .page-title { margin: 0 0 0.25rem; font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; color: var(--client-text); }
+        .client-look .page-subtitle { margin: 0; color: var(--client-muted); font-size: 0.9375rem; }
+        .client-look .page-header-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+        .client-look .card { background: var(--client-surface); border-radius: 12px; border: 1px solid var(--client-border); box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08); margin-bottom: 1.25rem; overflow: hidden; }
+        .client-look .card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--client-border); background: #fafbfc; }
+        .client-look .card-title { margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--client-text); }
+        .client-look .card-body { padding: 1.25rem; }
+        .client-look .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; border-radius: 8px; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .client-look .btn:hover { text-decoration: none; }
+        .client-look .btn-primary { background: var(--client-primary); color: #fff; border-color: var(--client-primary); }
+        .client-look .btn-primary:hover { background: var(--client-primary-hover); border-color: var(--client-primary-hover); color: #fff; }
+        .client-look .btn-outline { background: transparent; border-color: var(--client-border); color: var(--client-text); }
+        .client-look .btn-outline:hover { background: var(--client-bg); color: var(--client-text); }
+        .client-look .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8125rem; }
+        .client-look .text-muted { color: var(--client-muted); font-size: 0.9375rem; }
+        .client-look .avail-legend-card .card-body { padding-bottom: 0.5rem; }
+        .client-look .avail-legend { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; font-size: 0.875rem; color: var(--client-text); }
+        .client-look .avail-dot { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 4px; margin-right: 0.5rem; vertical-align: middle; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+        .client-look .avail-dot-available { background: #22c55e; }
+        .client-look .avail-dot-full { background: #ef4444; }
+        .client-look .avail-dot-past { background: #94a3b8; }
+        .client-look .avail-note { margin: 0.75rem 0 0; font-size: 0.8125rem; }
+        .client-look .avail-cal-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }
+        .client-look .avail-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .client-look .avail-cal { border-top: 1px solid var(--client-border); }
+        .client-look .avail-cal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-bottom: 1px solid var(--client-border); }
+        .client-look .avail-cal-head { background: #fafbfc; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--client-muted); }
+        .client-look .avail-cal-cell { min-height: 4.5rem; padding: 0.5rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; border-right: 1px solid var(--client-border); text-decoration: none; color: inherit; box-sizing: border-box; }
+        .client-look .avail-cal-row .avail-cal-cell:last-child { border-right: none; }
+        .client-look .avail-cal-dow { min-height: auto; padding: 0.65rem 0.5rem; justify-content: center; align-items: center; text-align: center; }
+        .client-look .avail-cal-dlabel { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--client-muted); }
+        .client-look .avail-cal-num { font-size: 1.125rem; font-weight: 700; }
+        .client-look .avail-cal-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
+        .client-look .avail-cal-sub { font-size: 0.65rem; color: var(--client-muted); }
+        .client-look .avail-cal-muted { background: #f8fafc; color: #cbd5e1; }
+        .client-look .avail-cal-past { background: #f8fafc; color: #64748b; border-left: 4px solid #cbd5e1; }
+        .client-look .avail-cal-past .avail-cal-tag { background: #f1f5f9; color: #475569; }
+        .client-look .avail-cal-full { background: #fff1f2; color: #991b1b; border-left: 4px solid #f43f5e; }
+        .client-look .avail-cal-full .avail-cal-tag { background: #ffe4e6; color: #be123c; }
+        .client-look .avail-cal-open { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; cursor: pointer; transition: all 0.2s ease; }
+        .client-look .avail-cal-open .avail-cal-tag { background: #dcfce7; color: #15803d; }
+        .client-look .avail-cal-open:hover { background: #dcfce7; text-decoration: none; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 10; }
+    </style>
+
+    <div class="client-look">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Appointment calendar</h1>
+                <p class="page-subtitle">See open and full dates before booking admin appointments.</p>
+            </div>
+            <div class="page-header-actions">
+                <a href="{{ route('admin.appointments.create') }}" class="btn btn-primary">Book appointment</a>
+                <a href="{{ route('admin.appointments.index') }}" class="btn btn-outline">List view</a>
             </div>
         </div>
-        <div class="xl:col-span-9 col-span-12">
-            <div class="box custom-box">
-                <div class="box-header flex flex-wrap justify-between items-center gap-2">
-                    <div class="box-title mb-0">Full calendar</div>
+
+        <div class="card avail-legend-card" style="border-left: 4px solid var(--client-primary);">
+            <div class="card-body">
+                <div class="avail-legend">
+                    <span class="legend-item"><span class="avail-dot avail-dot-available"></span> <strong>Open</strong> — Available for booking</span>
+                    <span class="legend-item"><span class="avail-dot avail-dot-full"></span> <strong>Full</strong> — Clinic at maximum capacity</span>
+                    <span class="legend-item"><span class="avail-dot avail-dot-past"></span> <strong>Past</strong> — Date has already passed</span>
                 </div>
-                <div class="box-body">
-                    <div id="calendar2"></div>
+                <p class="avail-note text-muted" style="margin-top: 0.75rem;">
+                    <i class="ri-information-line me-1"></i> A day is marked <strong>Full</strong> when there are {{ $slotCount }} active appointments. Cancelled visits are not counted.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header avail-cal-header">
+                <h2 class="card-title mb-0">{{ $monthStart->translatedFormat('F Y') }}</h2>
+                <div class="avail-nav">
+                    <a href="{{ route('admin.appointments.calendar', ['year' => $prev->year, 'month' => $prev->month]) }}" class="btn btn-outline btn-sm">&larr; {{ $prev->translatedFormat('M Y') }}</a>
+                    <a href="{{ route('admin.appointments.calendar', ['year' => now()->year, 'month' => now()->month]) }}" class="btn btn-outline btn-sm">This month</a>
+                    <a href="{{ route('admin.appointments.calendar', ['year' => $next->year, 'month' => $next->month]) }}" class="btn btn-outline btn-sm">{{ $next->translatedFormat('M Y') }} &rarr;</a>
+                </div>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="avail-cal">
+                    <div class="avail-cal-row avail-cal-head">
+                        @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $dow)
+                            <div class="avail-cal-cell avail-cal-dow">{{ $dow }}</div>
+                        @endforeach
+                    </div>
+                    @foreach ($weeks as $week)
+                        <div class="avail-cal-row">
+                            @foreach ($week as $cell)
+                                @php $d = $cell['day']; @endphp
+                                @if (! $cell['in_month'])
+                                    <div class="avail-cal-cell avail-cal-muted">
+                                        <span class="avail-cal-num">{{ $d->day }}</span>
+                                    </div>
+                                @elseif ($cell['status'] === 'past')
+                                    <div class="avail-cal-cell avail-cal-past">
+                                        <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
+                                        <span class="avail-cal-num">{{ $d->day }}</span>
+                                        <span class="avail-cal-tag">Past</span>
+                                    </div>
+                                @elseif ($cell['status'] === 'full')
+                                    <div class="avail-cal-cell avail-cal-full">
+                                        <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
+                                        <span class="avail-cal-num">{{ $d->day }}</span>
+                                        <span class="avail-cal-tag">Full</span>
+                                    </div>
+                                @else
+                                    <a href="{{ route('admin.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-open">
+                                        <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
+                                        <span class="avail-cal-num">{{ $d->day }}</span>
+                                        <span class="avail-cal-tag">Open</span>
+                                        <span class="avail-cal-sub">{{ $cell['used'] }}/{{ $cell['total'] }} taken</span>
+                                    </a>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </div>
-@endsection
-
-@section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.11/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.11/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/list@6.1.11/index.global.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var events = @json($events);
-
-            var calendarEl = document.getElementById('calendar2');
-            if (!calendarEl) return;
-
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-                },
-                navLinks: true,
-                editable: false,
-                selectable: false,
-                dayMaxEvents: true,
-                height: 'auto',
-                events: events,
-                eventClick: function (info) {
-                    info.jsEvent.preventDefault();
-                    var url = info.event.extendedProps && info.event.extendedProps.editUrl;
-                    if (url) window.location.href = url;
-                }
-            });
-            calendar.render();
-
-            var act = document.getElementById('full-calendar-activity');
-            if (act && typeof SimpleBar !== 'undefined') {
-                new SimpleBar(act, { autoHide: true });
-            }
-        });
-    </script>
 @endsection
