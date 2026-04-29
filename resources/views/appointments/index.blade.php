@@ -1,7 +1,5 @@
 @extends('layouts.valex')
 @section('page-title', 'Appointment Management')
-@section('breadcrumb-parent', 'Appointment Management')
-@section('breadcrumb-child', 'Index')
 
 @section('content')
 
