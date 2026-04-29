@@ -1,7 +1,5 @@
 @extends('layouts.valex')
 @section('page-title', 'Activity Logs')
-@section('breadcrumb-parent', 'System')
-@section('breadcrumb-child', 'Activity Logs')
 
 @section('content')
 
