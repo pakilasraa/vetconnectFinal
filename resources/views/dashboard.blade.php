@@ -1,8 +1,6 @@
 @extends('layouts.valex')
 
 @section('page-title', 'Clinic Dashboard')
-@section('breadcrumb-parent', 'Dashboard')
-@section('breadcrumb-child', 'Analytics')
 
 @section('content')
 <!-- Start::row-1 -->
