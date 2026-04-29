@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Appointment;
 use App\Support\AppointmentSlots;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -39,7 +40,54 @@ class AppointmentController extends Controller
 
             $appointments = $query->orderBy('appointment_date')->orderBy('appointment_time')->get();
 
-            return view('client.client-appointment.ClientAppointment', compact('appointments', 'filter'));
+            // Build availability calendar data for the merged page
+            $calYear  = max(2000, min(2100, (int) $request->get('cal_year',  now()->year)));
+            $calMonth = max(1,    min(12,   (int) $request->get('cal_month', now()->month)));
+            $monthStart = Carbon::createFromDate($calYear, $calMonth, 1)->startOfDay();
+            $monthEnd   = $monthStart->copy()->endOfMonth();
+            $slotCount  = count(AppointmentSlots::times());
+
+            $bookedCounts = Appointment::query()
+                ->selectRaw('appointment_date, COUNT(*) as c')
+                ->whereBetween('appointment_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->where('status', '!=', 'cancelled')
+                ->groupBy('appointment_date')
+                ->pluck('c', 'appointment_date');
+
+            $gridStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+            $gridEnd   = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+            $calWeeks  = [];
+            $cursor    = $gridStart->copy();
+            $today     = today()->startOfDay();
+
+            while ($cursor->lte($gridEnd)) {
+                $week = [];
+                for ($i = 0; $i < 7; $i++) {
+                    $day     = $cursor->copy();
+                    $dateStr = $day->toDateString();
+                    $inMonth = $day->month === $calMonth;
+
+                    if (! $inMonth) {
+                        $week[] = ['day' => $day, 'in_month' => false, 'status' => 'other', 'date_str' => $dateStr];
+                    } elseif ($day->lt($today)) {
+                        $week[] = ['day' => $day, 'in_month' => true,  'status' => 'past',  'date_str' => $dateStr];
+                    } else {
+                        $used   = (int) ($bookedCounts[$dateStr] ?? 0);
+                        $status = $used >= $slotCount ? 'full' : 'available';
+                        $week[] = ['day' => $day, 'in_month' => true,  'status' => $status, 'date_str' => $dateStr, 'used' => $used, 'total' => $slotCount];
+                    }
+                    $cursor->addDay();
+                }
+                $calWeeks[] = $week;
+            }
+
+            $calPrev = $monthStart->copy()->subMonth();
+            $calNext = $monthStart->copy()->addMonth();
+
+            return view('client.client-appointment.ClientAppointment', compact(
+                'appointments', 'filter',
+                'calWeeks', 'monthStart', 'calYear', 'calMonth', 'calPrev', 'calNext', 'slotCount'
+            ));
         }
 
         if ($request->has('search')) {
@@ -51,10 +99,12 @@ class AppointmentController extends Controller
                     $oq->where('name', 'like', "%{$search}%");
                 });
             });
+        } else {
+            $query->whereDate('appointment_date', '>=', today());
         }
 
-        $appointments = $query->orderBy('appointment_date')
-            ->orderBy('appointment_time')
+        $appointments = $query->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
             ->paginate(10);
 
         return view('appointments.index', compact('appointments'));
@@ -62,67 +112,8 @@ class AppointmentController extends Controller
 
     public function calendar(Request $request): View
     {
-        $windowStart = now()->subMonths(2)->startOfMonth();
-        $windowEnd = now()->addMonths(6)->endOfMonth();
-
-        $appointments = Appointment::with(['pet', 'owner'])
-            ->whereBetween('appointment_date', [$windowStart->toDateString(), $windowEnd->toDateString()])
-            ->orderBy('appointment_date')
-            ->orderBy('appointment_time')
-            ->get();
-
-        $events = $appointments->map(function (Appointment $a) {
-            $date = Carbon::parse($a->appointment_date)->format('Y-m-d');
-            $time = (string) $a->appointment_time;
-            if (strlen($time) === 5) {
-                $time .= ':00';
-            }
-            $start = Carbon::parse("{$date} {$time}");
-            $end = $start->copy()->addMinutes(45);
-
-            [$background, $border] = match ($a->status) {
-                'confirmed' => ['#22C03C', '#1a9a30'],
-                'completed' => ['#6b7280', '#4b5563'],
-                'cancelled' => ['#dc2626', '#b91c1c'],
-                default => ['#0d6efd', '#0a58ca'],
-            };
-
-            return [
-                'id' => (string) $a->id,
-                'title' => $a->pet->name.' · '.$a->service_type,
-                'start' => $start->toIso8601String(),
-                'end' => $end->toIso8601String(),
-                'backgroundColor' => $background,
-                'borderColor' => $border,
-                'classNames' => $a->status === 'cancelled' ? ['appointment-cancelled'] : [],
-                'extendedProps' => [
-                    'editUrl' => route('admin.appointments.edit', $a),
-                    'owner' => $a->owner->name,
-                    'status' => $a->status,
-                    'dayLabel' => $start->translatedFormat('l, M j, Y'),
-                    'timeLabel' => $start->format('g:i A'),
-                    'notes' => $a->notes,
-                ],
-            ];
-        })->values();
-
-        $activity = $appointments
-            ->sortBy(fn (Appointment $a) => Carbon::parse($a->appointment_date)->toDateString().' '.$a->appointment_time)
-            ->take(25)
-            ->values();
-
-        return view('appointments.calendar', compact('events', 'activity'));
-    }
-
-    public function clientAvailability(Request $request): View
-    {
-        if (! $request->user()->isPetOwner()) {
-            abort(404);
-        }
-
         $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
         $month = max(1, min(12, (int) $request->get('month', now()->month)));
-
         $monthStart = Carbon::createFromDate($year, $month, 1)->startOfDay();
         $monthEnd = $monthStart->copy()->endOfMonth();
         $slotCount = count(AppointmentSlots::times());
@@ -136,7 +127,6 @@ class AppointmentController extends Controller
 
         $gridStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
         $gridEnd = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
-
         $weeks = [];
         $cursor = $gridStart->copy();
         $today = today()->startOfDay();
@@ -157,23 +147,78 @@ class AppointmentController extends Controller
                     $status = $used >= $slotCount ? 'full' : 'available';
                     $week[] = ['day' => $day, 'in_month' => true, 'status' => $status, 'date_str' => $dateStr, 'used' => $used, 'total' => $slotCount];
                 }
+
                 $cursor->addDay();
             }
             $weeks[] = $week;
         }
 
+        $windowStart = $monthStart->copy()->startOfMonth();
+        $windowEnd = $monthStart->copy()->addMonth()->endOfMonth();
+
+        $appointments = Appointment::with(['pet', 'owner'])
+            ->whereBetween('appointment_date', [$windowStart->toDateString(), $windowEnd->toDateString()])
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->get();
+
+        $activity = $appointments
+            ->sortBy(fn (Appointment $a) => Carbon::parse($a->appointment_date)->toDateString().' '.$a->appointment_time)
+            ->take(25)
+            ->values();
+
         $prev = $monthStart->copy()->subMonth();
         $next = $monthStart->copy()->addMonth();
 
-        return view('client.client-appointment.AvailabilityCalendar', compact(
-            'weeks',
+        return view('appointments.calendar', compact(
             'monthStart',
-            'year',
-            'month',
             'prev',
             'next',
-            'slotCount'
+            'weeks',
+            'slotCount',
+            'activity'
         ));
+    }
+
+    public function clientAvailability(Request $request): RedirectResponse
+    {
+        // The availability calendar is now embedded in the appointments page.
+        // Redirect old bookmarks/links to the merged appointments page,
+        // forwarding year/month as cal_year/cal_month so the right month opens.
+        $params = [];
+        if ($request->has('year'))  { $params['cal_year']  = $request->get('year'); }
+        if ($request->has('month')) { $params['cal_month'] = $request->get('month'); }
+        $params['tab'] = 'calendar';
+
+        return redirect()->route('client.appointments.index', $params);
+    }
+
+    public function bookedSlots(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'exclude_id' => 'nullable|integer|exists:appointments,id',
+        ]);
+
+        $query = Appointment::query()
+            ->whereDate('appointment_date', $validated['date'])
+            ->where('status', '!=', 'cancelled');
+
+        if (! empty($validated['exclude_id'])) {
+            $query->where('id', '!=', $validated['exclude_id']);
+        }
+
+        $booked = $query->pluck('appointment_time')
+            ->map(function ($time) {
+                $time = (string) $time;
+                return strlen($time) === 5 ? "{$time}:00" : $time;
+            })
+            ->values();
+
+        return response()->json([
+            'booked' => $booked,
+            'slots' => AppointmentSlots::times(),
+        ]);
     }
 
     public function create(Request $request): View
@@ -214,11 +259,12 @@ class AppointmentController extends Controller
             ? $request->user()->id
             : $validated['user_id'];
 
-        if ($request->user()->isPetOwner()) {
-            $pet = \App\Models\Pet::where('id', $validated['pet_id'])->where('owner_id', $request->user()->id)->first();
-            if (! $pet) {
-                return back()->withInput()->withErrors(['pet_id' => 'Invalid pet selection.']);
-            }
+        $pet = \App\Models\Pet::where('id', $validated['pet_id'])
+            ->where('owner_id', $validated['user_id'])
+            ->first();
+
+        if (! $pet) {
+            return back()->withInput()->withErrors(['pet_id' => 'Selected pet does not belong to the selected owner.']);
         }
 
         $exists = Appointment::where('appointment_date', $validated['appointment_date'])
@@ -266,18 +312,23 @@ class AppointmentController extends Controller
         $validated = $request->validate([
             'pet_id' => 'required|exists:pets,id',
             'user_id' => 'required|exists:users,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_date' => 'required|date', // Relaxed to allow editing past appointments
             'appointment_time' => 'required',
             'service_type' => 'required|string|max:255',
-            'status' => 'required|in:pending,confirmed,completed,cancelled',
+            'status' => 'sometimes|required|in:pending,confirmed,completed,cancelled',
             'notes' => 'nullable|string',
         ]);
 
         if ($request->user()->isPetOwner()) {
-            if (! $request->user()->pets->contains('id', (int) $validated['pet_id'])) {
-                return back()->withInput()->withErrors(['pet_id' => 'Invalid pet selection.']);
-            }
             $validated['user_id'] = $request->user()->id;
+        }
+
+        $pet = \App\Models\Pet::where('id', $validated['pet_id'])
+            ->where('owner_id', $validated['user_id'])
+            ->first();
+
+        if (! $pet) {
+            return back()->withInput()->withErrors(['pet_id' => 'Selected pet does not belong to the selected owner.']);
         }
 
         $exists = Appointment::where('appointment_date', $validated['appointment_date'])
