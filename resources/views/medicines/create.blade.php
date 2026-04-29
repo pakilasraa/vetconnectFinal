@@ -1,7 +1,5 @@
 @extends('layouts.valex')
 @section('page-title', 'Add medicine')
-@section('breadcrumb-parent', 'Medicines')
-@section('breadcrumb-child', 'Add')
 
 @section('content')
     <div class="xl:col-span-12 col-span-12">
