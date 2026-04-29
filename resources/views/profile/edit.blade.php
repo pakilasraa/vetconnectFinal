@@ -1,8 +1,6 @@
 @extends('layouts.valex')
 
 @section('page-title', 'Profile Settings')
-@section('breadcrumb-parent', 'Settings')
-@section('breadcrumb-child', 'Profile')
 
 @section('content')
     <div class="grid grid-cols-12 gap-x-6">
