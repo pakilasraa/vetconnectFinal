@@ -3,6 +3,7 @@
 
 <head>
     @include('layouts.partials.valex.head')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"/>
 </head>
 
 <body>
@@ -445,6 +446,22 @@
         .main-sidebar-header {
             transition: width 0.3s ease, padding 0.3s ease;
         }
+        .page-header-breadcrumb {
+            padding-top: 0.35rem;
+            padding-bottom: 0.15rem;
+            overflow: visible;
+        }
+        .page-header-breadcrumb .page-title {
+            line-height: 1.35;
+            padding-top: 1px;
+        }
+        .main-content.app-content {
+            margin-top: 0 !important;
+            padding-top: 4.25rem;
+        }
+        .main-content.app-content .container-fluid {
+            padding-top: 0.5rem;
+        }
     </style>
     <div class="page">
         @include('layouts.partials.valex.header')
@@ -453,20 +470,6 @@
         <!-- Start::app-content -->
         <div class="main-content app-content">
             <div class="container-fluid">
-                <!-- Page Header -->
-                <div class="d-md-flex d-block align-items-center justify-content-between my-[1.5rem] page-header-breadcrumb">
-                    <h1 class="page-title fw-semibold fs-18 mb-0 text-dark">@yield('page-title', 'Dashboard')</h1>
-                    <div class="ms-md-1 ms-0">
-                        <nav>
-                            <ol class="breadcrumb mb-0">
-                                <li class="breadcrumb-item"><a href="javascript:void(0);">@yield('breadcrumb-parent', 'Home')</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">@yield('breadcrumb-child', 'Dashboard')</li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-                <!-- Page Header Close -->
-
                 @yield('content')
             </div>
         </div>
@@ -532,6 +535,127 @@
     </div>
 
     @include('layouts.partials.valex.scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (function () {
+            if (!window.Swal) return;
+
+            const swalAnim = {
+                showClass: {
+                    popup: 'animate__animated animate__fadeInUp animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutDown animate__faster'
+                }
+            };
+
+            function buildThemeOptions() {
+                const html = document.documentElement;
+                const styles = getComputedStyle(html);
+                const primaryRgb = (styles.getPropertyValue('--primary-rgb') || '1, 98, 232').trim();
+                const isDark = html.classList.contains('dark');
+                const popupBg = isDark ? '#1f2937' : '#ffffff';
+                const textColor = isDark ? '#e5e7eb' : '#111827';
+
+                return {
+                    confirmButtonColor: `rgb(${primaryRgb})`,
+                    cancelButtonColor: isDark ? '#475569' : '#64748b',
+                    background: popupBg,
+                    color: textColor
+                };
+            }
+
+            function themedSwal(options) {
+                return Swal.fire({
+                    ...swalAnim,
+                    ...buildThemeOptions(),
+                    ...options
+                });
+            }
+
+            const successMessage = @json(session('success'));
+            const errorMessage = @json(session('error'));
+            const errorList = @json($errors->all());
+
+            if (successMessage) {
+                themedSwal({
+                    icon: 'success',
+                    title: 'Success',
+                    text: successMessage,
+                    confirmButtonText: 'OK'
+                });
+            } else if (errorMessage) {
+                themedSwal({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                });
+            } else if (Array.isArray(errorList) && errorList.length > 0) {
+                themedSwal({
+                    icon: 'error',
+                    title: 'Please check your input',
+                    html: '<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + errorList.map((msg) => `<li>${msg}</li>`).join('') + '</ul>',
+                    confirmButtonText: 'OK'
+                });
+            }
+
+            function getConfirmMessageFromAttr(attrValue) {
+                if (!attrValue) return 'Are you sure?';
+                const match = attrValue.match(/confirm\((['"`])([\s\S]*?)\1\)/);
+                return match && match[2] ? match[2] : 'Are you sure?';
+            }
+
+            async function runConfirm(message) {
+                const result = await themedSwal({
+                    title: 'Please confirm',
+                    text: message || 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, continue',
+                    cancelButtonText: 'Cancel'
+                });
+
+                return result.isConfirmed;
+            }
+
+            document.addEventListener('click', async function (event) {
+                const trigger = event.target.closest('[onclick*="confirm("]');
+                if (!trigger) return;
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                const message = getConfirmMessageFromAttr(trigger.getAttribute('onclick'));
+                const confirmed = await runConfirm(message);
+                if (!confirmed) return;
+
+                const form = trigger.closest('form');
+                if (form) {
+                    form.submit();
+                    return;
+                }
+
+                if (trigger.tagName === 'A' && trigger.href) {
+                    window.location.href = trigger.href;
+                }
+            }, true);
+
+            document.addEventListener('submit', async function (event) {
+                const form = event.target;
+                if (!(form instanceof HTMLFormElement)) return;
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                if (!onsubmitAttr || !onsubmitAttr.includes('confirm(')) return;
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                const message = getConfirmMessageFromAttr(onsubmitAttr);
+                const confirmed = await runConfirm(message);
+                if (confirmed) form.submit();
+            }, true);
+        })();
+    </script>
 </body>
 
 </html>
