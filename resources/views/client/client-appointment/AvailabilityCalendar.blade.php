@@ -14,13 +14,17 @@
     </div>
 </div>
 
-<div class="card avail-legend-card">
-    <div class="card-body avail-legend">
-        <span><span class="avail-dot avail-dot-available"></span> Open — at least one time slot is free</span>
-        <span><span class="avail-dot avail-dot-full"></span> Full — all standard slots are taken</span>
-        <span><span class="avail-dot avail-dot-past"></span> Past — cannot book</span>
+<div class="card avail-legend-card" style="border-left: 4px solid var(--client-primary);">
+    <div class="card-body">
+        <div class="avail-legend">
+            <span class="legend-item"><span class="avail-dot avail-dot-available"></span> <strong>Open</strong> — Available for booking</span>
+            <span class="legend-item"><span class="avail-dot avail-dot-full"></span> <strong>Full</strong> — Clinic at maximum capacity</span>
+            <span class="legend-item"><span class="avail-dot avail-dot-past"></span> <strong>Past</strong> — Date has already passed</span>
+        </div>
+        <p class="avail-note text-muted" style="margin-top: 0.75rem;">
+            <i class="ri-information-line me-1"></i> A day is marked <strong>Full</strong> when there are {{ $slotCount }} active appointments. Cancelled visits are not counted.
+        </p>
     </div>
-    <p class="avail-note text-muted">A day is marked <strong>Full</strong> when there are already {{ $slotCount }} active appointments that day (clinic capacity). Cancelled visits do not count.</p>
 </div>
 
 <div class="card">
