@@ -450,7 +450,7 @@
 
           <button id="dropdown-profile" type="button"
             class="hs-dropdown-toggle ti-dropdown-toggle !gap-2 !p-0 flex-shrink-0 me-0 !rounded-full !shadow-none text-xs align-middle !border-0 !shadow-transparent ">
-            <img class="inline-block rounded-full " src="{{ Auth::check() && Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : asset('valex/assets/images/faces/6.jpg') }}" width="37" height="37"
+            <img class="inline-block rounded-full " src="{{ Auth::check() && Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : asset('backend/assets/images/faces/6.jpg') }}" width="37" height="37"
               alt="{{ Auth::check() ? Auth::user()->name : 'User' }} profile photo">
           </button>
           <div
