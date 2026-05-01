@@ -18,6 +18,7 @@
     <div class="card-body">
         <div class="avail-legend">
             <span class="legend-item"><span class="avail-dot avail-dot-available"></span> <strong>Open</strong> — Available for booking</span>
+                <span class="legend-item"><span class="avail-dot avail-dot-booked"></span> <strong>Booked</strong> — Some slots taken</span>
             <span class="legend-item"><span class="avail-dot avail-dot-full"></span> <strong>Full</strong> — Clinic at maximum capacity</span>
             <span class="legend-item"><span class="avail-dot avail-dot-past"></span> <strong>Past</strong> — Date has already passed</span>
         </div>
@@ -58,11 +59,18 @@
                                 <span class="avail-cal-tag">Past</span>
                             </div>
                         @elseif ($cell['status'] === 'full')
-                            <div class="avail-cal-cell avail-cal-full">
+                            <a href="{{ route('client.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-full">
                                 <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
                                 <span class="avail-cal-num">{{ $d->day }}</span>
                                 <span class="avail-cal-tag">Full</span>
-                            </div>
+                            </a>
+                        @elseif ($cell['status'] === 'booked')
+                            <a href="{{ route('client.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-booked">
+                                <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
+                                <span class="avail-cal-num">{{ $d->day }}</span>
+                                <span class="avail-cal-tag">Booked</span>
+                                <span class="avail-cal-sub">{{ $cell['used'] }}/{{ $cell['total'] }} taken</span>
+                            </a>
                         @else
                             <a href="{{ route('client.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-open">
                                 <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
