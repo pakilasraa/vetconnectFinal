@@ -56,6 +56,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('pets', PetController::class);
     Route::get('appointments/calendar', [AppointmentController::class, 'calendar'])->name('appointments.calendar');
     Route::get('appointments/booked-slots', [AppointmentController::class, 'bookedSlots'])->name('appointments.booked-slots');
+    Route::patch('appointments/check-in', [AppointmentController::class, 'checkInByReference'])->name('appointments.check-in');
     Route::resource('appointments', AppointmentController::class);
     Route::resource('medicines', MedicineController::class)->except(['show']);
     Route::resource('medical-records', MedicalRecordController::class);
