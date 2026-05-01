@@ -10,14 +10,74 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AppointmentController extends Controller
 {
     use RedirectsToPanelRoute;
 
+    private function autoCancelNoShowsAndPast(): void
+    {
+        $today = today();
+        $todayStr = $today->toDateString();
+        $nowTime = now()->toTimeString(); // HH:MM:SS
+
+        $toCancel = Appointment::query()
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where(function ($q) use ($today, $nowTime) {
+                $q->whereDate('appointment_date', '<', $today)
+                    ->orWhere(function ($q2) use ($today, $nowTime) {
+                        $q2->whereDate('appointment_date', '=', $today)
+                            ->whereTime('appointment_time', '<', $nowTime);
+                    });
+            })
+            ->get(['id', 'user_id', 'pet_id', 'appointment_date', 'appointment_time', 'status', 'notes']);
+
+        if ($toCancel->isEmpty()) {
+            return;
+        }
+
+        foreach ($toCancel as $appointment) {
+            $reason = $appointment->appointment_date < $todayStr
+                ? 'Auto-cancelled (past date)'
+                : 'Auto-cancelled (no-show)';
+
+            $existingNotes = $appointment->notes ? rtrim((string) $appointment->notes) : '';
+
+            $appointment->status = 'cancelled';
+            $appointment->notes = $existingNotes
+                ? $existingNotes . "\n" . $reason
+                : $reason;
+
+            $appointment->save();
+
+            ActivityLog::create([
+                'user_id' => $appointment->user_id,
+                'action' => 'Auto-cancelled Appointment',
+                'description' => "{$reason} for appointment #{$appointment->id} at {$appointment->appointment_time}.",
+                'model_type' => Appointment::class,
+                'model_id' => $appointment->id,
+            ]);
+        }
+    }
+
+    private function generateReferenceNumber(string $appointmentDate): string
+    {
+        $date = Carbon::parse($appointmentDate)->format('Ymd');
+
+        do {
+            $ref = 'VC-' . $date . '-' . strtoupper(Str::random(6));
+        } while (Appointment::query()->where('reference_number', $ref)->exists());
+
+        return $ref;
+    }
+
     public function index(Request $request): View
     {
+        // Auto-cancel missed/past appointments so calendars and lists stay accurate.
+        $this->autoCancelNoShowsAndPast();
+
         $user = $request->user();
         $query = Appointment::with(['pet', 'owner']);
 
@@ -40,6 +100,14 @@ class AppointmentController extends Controller
 
             $appointments = $query->orderBy('appointment_date')->orderBy('appointment_time')->get();
 
+            // Backfill missing reference numbers for older appointments.
+            foreach ($appointments as $appointment) {
+                if (! $appointment->reference_number) {
+                    $appointment->reference_number = $this->generateReferenceNumber($appointment->appointment_date);
+                    $appointment->save();
+                }
+            }
+
             // Build availability calendar data for the merged page
             $calYear  = max(2000, min(2100, (int) $request->get('cal_year',  now()->year)));
             $calMonth = max(1,    min(12,   (int) $request->get('cal_month', now()->month)));
@@ -50,13 +118,24 @@ class AppointmentController extends Controller
             $bookedCounts = Appointment::query()
                 ->selectRaw('appointment_date, COUNT(*) as c')
                 ->whereBetween('appointment_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                ->where('status', '!=', 'cancelled')
+                ->whereIn('status', ['pending', 'confirmed'])
                 ->groupBy('appointment_date')
                 ->pluck('c', 'appointment_date');
 
             $gridStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
             $gridEnd   = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
             $calWeeks  = [];
+
+            // For rendering event "cards" inside each calendar day cell (Google Calendar style).
+            $appointmentsByDate = Appointment::query()
+                ->with(['pet'])
+                ->whereBetween('appointment_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
+                ->where('user_id', $user->id)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->orderBy('appointment_time')
+                ->get()
+                ->groupBy('appointment_date');
+
             $cursor    = $gridStart->copy();
             $today     = today()->startOfDay();
 
@@ -73,7 +152,9 @@ class AppointmentController extends Controller
                         $week[] = ['day' => $day, 'in_month' => true,  'status' => 'past',  'date_str' => $dateStr];
                     } else {
                         $used   = (int) ($bookedCounts[$dateStr] ?? 0);
-                        $status = $used >= $slotCount ? 'full' : 'available';
+                        $status = $used === 0
+                            ? 'available'
+                            : ($used >= $slotCount ? 'full' : 'booked');
                         $week[] = ['day' => $day, 'in_month' => true,  'status' => $status, 'date_str' => $dateStr, 'used' => $used, 'total' => $slotCount];
                     }
                     $cursor->addDay();
@@ -84,9 +165,30 @@ class AppointmentController extends Controller
             $calPrev = $monthStart->copy()->subMonth();
             $calNext = $monthStart->copy()->addMonth();
 
+            $selectedDate = $request->get('date');
+            $selectedDayAppointments = collect();
+
+            if (is_string($selectedDate) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
+                $selectedDayAppointments = Appointment::with(['pet', 'owner'])
+                    ->whereDate('appointment_date', $selectedDate)
+                    ->where('user_id', $user->id)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->orderBy('appointment_time')
+                    ->get();
+
+                // Backfill missing reference numbers for older appointments.
+                foreach ($selectedDayAppointments as $appointment) {
+                    if (! $appointment->reference_number) {
+                        $appointment->reference_number = $this->generateReferenceNumber($appointment->appointment_date);
+                        $appointment->save();
+                    }
+                }
+            }
+
             return view('client.client-appointment.ClientAppointment', compact(
                 'appointments', 'filter',
                 'calWeeks', 'monthStart', 'calYear', 'calMonth', 'calPrev', 'calNext', 'slotCount'
+                , 'selectedDate', 'selectedDayAppointments', 'appointmentsByDate'
             ));
         }
 
@@ -97,7 +199,8 @@ class AppointmentController extends Controller
                     $pq->where('name', 'like', "%{$search}%");
                 })->orWhereHas('owner', function ($oq) use ($search) {
                     $oq->where('name', 'like', "%{$search}%");
-                });
+                })->orWhere('reference_number', 'like', "%{$search}%")
+                    ->orWhere('service_type', 'like', "%{$search}%");
             });
         } else {
             $query->whereDate('appointment_date', '>=', today());
@@ -107,11 +210,20 @@ class AppointmentController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->paginate(10);
 
+        foreach ($appointments as $appointment) {
+            if (! $appointment->reference_number) {
+                $appointment->reference_number = $this->generateReferenceNumber($appointment->appointment_date);
+                $appointment->save();
+            }
+        }
+
         return view('appointments.index', compact('appointments'));
     }
 
     public function calendar(Request $request): View
     {
+        $this->autoCancelNoShowsAndPast();
+
         $year = max(2000, min(2100, (int) $request->get('year', now()->year)));
         $month = max(1, min(12, (int) $request->get('month', now()->month)));
         $monthStart = Carbon::createFromDate($year, $month, 1)->startOfDay();
@@ -121,7 +233,7 @@ class AppointmentController extends Controller
         $bookedCounts = Appointment::query()
             ->selectRaw('appointment_date, COUNT(*) as c')
             ->whereBetween('appointment_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-            ->where('status', '!=', 'cancelled')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->groupBy('appointment_date')
             ->pluck('c', 'appointment_date');
 
@@ -144,7 +256,9 @@ class AppointmentController extends Controller
                     $week[] = ['day' => $day, 'in_month' => true, 'status' => 'past', 'date_str' => $dateStr];
                 } else {
                     $used = (int) ($bookedCounts[$dateStr] ?? 0);
-                    $status = $used >= $slotCount ? 'full' : 'available';
+                    $status = $used === 0
+                        ? 'available'
+                        : ($used >= $slotCount ? 'full' : 'booked');
                     $week[] = ['day' => $day, 'in_month' => true, 'status' => $status, 'date_str' => $dateStr, 'used' => $used, 'total' => $slotCount];
                 }
 
@@ -170,13 +284,43 @@ class AppointmentController extends Controller
         $prev = $monthStart->copy()->subMonth();
         $next = $monthStart->copy()->addMonth();
 
+        $selectedDate = $request->get('date');
+        $selectedDayAppointments = collect();
+
+        if (is_string($selectedDate) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
+            $selectedDayAppointments = Appointment::with(['pet', 'owner'])
+                ->whereDate('appointment_date', $selectedDate)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->orderBy('appointment_time')
+                ->get();
+
+            foreach ($selectedDayAppointments as $appointment) {
+                if (! $appointment->reference_number) {
+                    $appointment->reference_number = $this->generateReferenceNumber($appointment->appointment_date);
+                    $appointment->save();
+                }
+            }
+        }
+
+        // For rendering mini "event cards" inside each calendar cell.
+        $appointmentsByDate = Appointment::query()
+            ->with(['pet', 'owner'])
+            ->whereBetween('appointment_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('appointment_time')
+            ->get()
+            ->groupBy('appointment_date');
+
         return view('appointments.calendar', compact(
             'monthStart',
             'prev',
             'next',
             'weeks',
             'slotCount',
-            'activity'
+            'activity',
+            'selectedDate',
+            'selectedDayAppointments',
+            'appointmentsByDate'
         ));
     }
 
@@ -195,6 +339,8 @@ class AppointmentController extends Controller
 
     public function bookedSlots(Request $request): JsonResponse
     {
+        $this->autoCancelNoShowsAndPast();
+
         $validated = $request->validate([
             'date' => 'required|date',
             'exclude_id' => 'nullable|integer|exists:appointments,id',
@@ -202,7 +348,7 @@ class AppointmentController extends Controller
 
         $query = Appointment::query()
             ->whereDate('appointment_date', $validated['date'])
-            ->where('status', '!=', 'cancelled');
+            ->whereIn('status', ['pending', 'confirmed']);
 
         if (! empty($validated['exclude_id'])) {
             $query->where('id', '!=', $validated['exclude_id']);
@@ -259,6 +405,8 @@ class AppointmentController extends Controller
             ? $request->user()->id
             : $validated['user_id'];
 
+        $validated['reference_number'] = $validated['reference_number'] ?? $this->generateReferenceNumber($validated['appointment_date']);
+
         $pet = \App\Models\Pet::where('id', $validated['pet_id'])
             ->where('owner_id', $validated['user_id'])
             ->first();
@@ -269,7 +417,7 @@ class AppointmentController extends Controller
 
         $exists = Appointment::where('appointment_date', $validated['appointment_date'])
             ->where('appointment_time', $validated['appointment_time'])
-            ->where('status', '!=', 'cancelled')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->exists();
 
         if ($exists) {
@@ -333,7 +481,7 @@ class AppointmentController extends Controller
 
         $exists = Appointment::where('appointment_date', $validated['appointment_date'])
             ->where('appointment_time', $validated['appointment_time'])
-            ->where('status', '!=', 'cancelled')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->where('id', '!=', $appointment->id)
             ->exists();
 
@@ -357,6 +505,47 @@ class AppointmentController extends Controller
         $appointment->delete();
 
         return $this->panelRedirect('appointments.index')->with('success', 'Appointment deleted successfully.');
+    }
+
+    public function checkInByReference(Request $request): RedirectResponse
+    {
+        if (! $request->user()->isAdmin()) {
+            return redirect()->route('not-authorized');
+        }
+
+        $validated = $request->validate([
+            'reference_number' => 'required|string|max:50',
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
+        ]);
+
+        $referenceNumber = strtoupper(trim($validated['reference_number']));
+
+        $appointment = Appointment::query()
+            ->with(['pet', 'owner'])
+            ->whereRaw('UPPER(reference_number) = ?', [$referenceNumber])
+            ->first();
+
+        if (! $appointment) {
+            return back()->withErrors([
+                'reference_number' => "No appointment found for reference #{$referenceNumber}.",
+            ])->withInput();
+        }
+
+        $oldStatus = (string) $appointment->status;
+        $newStatus = (string) $validated['status'];
+
+        if ($oldStatus !== $newStatus) {
+            $appointment->status = $newStatus;
+            $appointment->save();
+
+            ActivityLog::log(
+                'Updated Appointment via Reference',
+                "Updated {$appointment->reference_number} from {$oldStatus} to {$newStatus}.",
+                $appointment
+            );
+        }
+
+        return back()->with('success', "Appointment #{$appointment->reference_number} for {$appointment->pet->name} is now {$appointment->status}.");
     }
 
     public function cancel(Request $request, Appointment $appointment): RedirectResponse
