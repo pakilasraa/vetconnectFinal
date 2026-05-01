@@ -24,7 +24,17 @@
                     <img src="{{ $user->photo_url }}" alt="Profile Photo" class="h-full w-full object-cover">
                 </div>
                 <div class="flex-1">
-                    <input id="photo" name="photo" type="file" accept="image/*" class="form-control" />
+                    <div class="flex items-center gap-3 flex-nowrap">
+                        <input
+                            id="photo"
+                            name="photo"
+                            type="file"
+                            accept="image/*"
+                            class="form-control"
+                            style="width: 260px; max-width: 100%;"
+                        />
+                        <button type="submit" class="ti-btn ti-btn-secondary ti-btn-wave whitespace-nowrap">{{ __('Save Photo') }}</button>
+                    </div>
                     @if ($errors->get('photo'))
                         <ul class="text-sm text-danger mt-2">
                             @foreach ($errors->get('photo') as $message)
@@ -32,9 +42,6 @@
                             @endforeach
                         </ul>
                     @endif
-                    <div class="mt-3">
-                        <button type="submit" class="ti-btn ti-btn-secondary ti-btn-wave">{{ __('Save Photo') }}</button>
-                    </div>
                 </div>
             </div>
         </div>
