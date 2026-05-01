@@ -14,6 +14,10 @@
                 <div class="box-body">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="xl:col-span-6 col-span-12">
+                            <label class="form-label">Reference #</label>
+                            <input type="text" class="form-control" value="{{ $appointment->reference_number ?: ('#'.$appointment->id) }}" readonly>
+                        </div>
+                        <div class="xl:col-span-6 col-span-12">
                             <label for="user_id" class="form-label">Pet Owner</label>
                             <select name="user_id" id="user_id" class="form-control" required>
                                 @foreach($owners as $owner)
