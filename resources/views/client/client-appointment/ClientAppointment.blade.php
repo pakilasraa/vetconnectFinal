@@ -46,10 +46,11 @@
                     <div class="appointment-main">
                         <div class="appointment-header">
                             <h3 class="appointment-pet-name">{{ $appointment->pet->name }}</h3>
-                            <span class="badge badge-{{ $appointment->status }}">{{ $appointment->status }}</span>
+                            <span class="badge badge-themed badge-themed--{{ $appointment->status }}">{{ $appointment->status }}</span>
                         </div>
                         <p class="appointment-type-text">{{ $appointment->service_type }}</p>
                         <div class="appointment-meta-grid">
+                            <span>Ref #{{ $appointment->reference_number ?: ('#'.$appointment->id) }}</span>
                             <span>{{ $appointment->formatted_date }}</span>
                             <span>{{ $appointment->appointment_time }}</span>
                         </div>
@@ -60,7 +61,7 @@
 
                     @if($appointment->status !== 'completed' && $appointment->status !== 'cancelled')
                         <div class="appointment-actions">
-                            <a href="{{ panel_route('appointments.edit', $appointment) }}" class="btn btn-outline btn-sm">Reschedule</a>
+                            <a href="{{ panel_route('appointments.edit', $appointment) }}" class="btn btn-outline-primary btn-sm">Reschedule</a>
                             <form action="{{ panel_route('appointments.cancel', $appointment) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('PATCH')
@@ -90,6 +91,7 @@
         <div class="card-body">
             <div class="avail-legend">
                 <span class="legend-item"><span class="avail-dot avail-dot-available"></span> <strong>Open</strong> — Available for booking</span>
+                <span class="legend-item"><span class="avail-dot avail-dot-booked"></span> <strong>Booked</strong> — Some slots taken</span>
                 <span class="legend-item"><span class="avail-dot avail-dot-full"></span> <strong>Full</strong> — Clinic at maximum capacity</span>
                 <span class="legend-item"><span class="avail-dot avail-dot-past"></span> <strong>Past</strong> — Date has already passed</span>
             </div>
@@ -137,13 +139,65 @@
                                     <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
                                     <span class="avail-cal-num">{{ $d->day }}</span>
                                     <span class="avail-cal-tag">Full</span>
+                                    @php $events = $appointmentsByDate[$cell['date_str']] ?? collect(); @endphp
+                                    @if($events->count() > 0)
+                                        <div class="cal-day-events">
+                                            @foreach($events->take(2) as $evt)
+                                                @php $serviceClass = \Illuminate\Support\Str::slug((string) $evt->service_type) ?: 'other'; @endphp
+                                                <div class="cal-event-pill cal-event-pill--service-{{ $serviceClass }}">
+                                                    <span class="cal-event-time">{{ \Carbon\Carbon::parse($evt->appointment_time)->format('g:i A') }}</span>
+                                                        <span class="cal-event-label">{{ $evt->service_type }}</span>
+                                                </div>
+                                            @endforeach
+                                            @if($events->count() > 2)
+                                                <div class="cal-event-more">+{{ $events->count() - 2 }} more</div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
+                            @elseif ($cell['status'] === 'booked')
+                                <a href="{{ route('client.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-booked">
+                                    <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
+                                    <span class="avail-cal-num">{{ $d->day }}</span>
+                                    <span class="avail-cal-tag">Booked</span>
+                                    <span class="avail-cal-sub">{{ $cell['used'] }}/{{ $cell['total'] }} taken</span>
+                                    @php $events = $appointmentsByDate[$cell['date_str']] ?? collect(); @endphp
+                                    @if($events->count() > 0)
+                                        <div class="cal-day-events">
+                                            @foreach($events->take(2) as $evt)
+                                                @php $serviceClass = \Illuminate\Support\Str::slug((string) $evt->service_type) ?: 'other'; @endphp
+                                                <div class="cal-event-pill cal-event-pill--service-{{ $serviceClass }}">
+                                                    <span class="cal-event-time">{{ \Carbon\Carbon::parse($evt->appointment_time)->format('g:i A') }}</span>
+                                                    <span class="cal-event-label">{{ $evt->service_type }}</span>
+                                                </div>
+                                            @endforeach
+                                            @if($events->count() > 2)
+                                                <div class="cal-event-more">+{{ $events->count() - 2 }} more</div>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </a>
                             @else
                                 <a href="{{ route('client.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-open">
                                     <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
                                     <span class="avail-cal-num">{{ $d->day }}</span>
                                     <span class="avail-cal-tag">Open</span>
                                     <span class="avail-cal-sub">{{ $cell['used'] }}/{{ $cell['total'] }} taken</span>
+                                    @php $events = $appointmentsByDate[$cell['date_str']] ?? collect(); @endphp
+                                    @if($events->count() > 0)
+                                        <div class="cal-day-events">
+                                            @foreach($events->take(2) as $evt)
+                                                @php $serviceClass = \Illuminate\Support\Str::slug((string) $evt->service_type) ?: 'other'; @endphp
+                                                <div class="cal-event-pill cal-event-pill--service-{{ $serviceClass }}">
+                                                    <span class="cal-event-time">{{ \Carbon\Carbon::parse($evt->appointment_time)->format('g:i A') }}</span>
+                                                    <span class="cal-event-label">{{ $evt->service_type }}</span>
+                                                </div>
+                                            @endforeach
+                                            @if($events->count() > 2)
+                                                <div class="cal-event-more">+{{ $events->count() - 2 }} more</div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </a>
                             @endif
                         @endforeach
@@ -152,6 +206,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 @endsection
