@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'VetConnect - Pet Care Management')</title>
+    <link rel="stylesheet" href="{{ asset('backend/assets/iconfonts/fontawesome/css/all.css') }}">
     @vite(['resources/css/client.css'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"/>
 </head>
@@ -16,8 +17,12 @@
                     <span>Menu</span>
                 </button>
                 <a href="{{ route('client.dashboard') }}" class="logo">
-                    <div class="logo-icon">VC</div>
-                    <span class="logo-text">VetConnect</span>
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-paw" aria-hidden="true"></i>
+                    </div>
+                    <span class="logo-text">
+                        <span class="logo-text-primary">Vet</span><span class="logo-text-secondary">Connect</span>
+                    </span>
                 </a>
             </div>
 
@@ -27,7 +32,10 @@
 
             <div class="header-right">
                 <button class="icon-btn theme-toggle-btn" id="openClientSwitcher" type="button" title="Theme settings">&#9881;</button>
-                <a href="{{ route('profile.edit') }}" class="icon-btn" title="Profile">Profile</a>
+                <a href="{{ route('profile.edit') }}" class="icon-btn profile-link-btn" title="Profile">
+                    <img src="{{ auth()->user()->photo_url }}" alt="Profile" class="profile-link-avatar">
+                    <span>Profile</span>
+                </a>
                 <form action="{{ route('logout') }}" method="POST" class="inline">
                     @csrf
                     <button type="submit" class="icon-btn" title="Log out">Log out</button>
@@ -58,6 +66,13 @@
                     <button class="swatch-btn" type="button" data-color="blue" style="background:#2563eb" title="Blue"></button>
                     <button class="swatch-btn" type="button" data-color="violet" style="background:#7c3aed" title="Violet"></button>
                     <button class="swatch-btn" type="button" data-color="rose" style="background:#e11d48" title="Rose"></button>
+                </div>
+            </div>
+            <div class="switcher-section">
+                <p class="switcher-label">Custom Primary Color</p>
+                <div class="switcher-color-picker">
+                    <input class="color-picker-input" id="customClientColor" type="color" value="#0d9488" aria-label="Choose custom primary color">
+                    <span class="color-picker-help">Pick any color to use as your theme primary.</span>
                 </div>
             </div>
             <div class="switcher-section">
@@ -127,6 +142,7 @@
             const closeSwitcher = document.getElementById('closeClientSwitcher');
             const modeButtons = Array.from(document.querySelectorAll('[data-mode]'));
             const colorButtons = Array.from(document.querySelectorAll('[data-color]'));
+            const customColorInput = document.getElementById('customClientColor');
             const resetThemeBtn = document.getElementById('resetClientTheme');
             const body = document.body;
             const root = document.documentElement;
@@ -140,6 +156,53 @@
             };
 
             const themeStorageKey = 'clientThemeV1';
+
+            function normalizeHexColor(hex) {
+                if (typeof hex !== 'string') return null;
+                const value = hex.trim().toLowerCase();
+                return /^#[0-9a-f]{6}$/.test(value) ? value : null;
+            }
+
+            function hexToRgb(hex) {
+                const normalized = normalizeHexColor(hex);
+                if (!normalized) return null;
+                const raw = normalized.slice(1);
+                return {
+                    r: parseInt(raw.slice(0, 2), 16),
+                    g: parseInt(raw.slice(2, 4), 16),
+                    b: parseInt(raw.slice(4, 6), 16)
+                };
+            }
+
+            function rgbToHex(rgb) {
+                const toHex = (v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0');
+                return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+            }
+
+            function darkenHex(hex, factor) {
+                const rgb = hexToRgb(hex);
+                if (!rgb) return '#0f766e';
+                return rgbToHex({
+                    r: Math.round(rgb.r * factor),
+                    g: Math.round(rgb.g * factor),
+                    b: Math.round(rgb.b * factor)
+                });
+            }
+
+            function toSoftRgba(hex, alpha) {
+                const rgb = hexToRgb(hex);
+                if (!rgb) return 'rgba(13, 148, 136, 0.12)';
+                return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+            }
+
+            function buildCustomPalette(hex) {
+                const color = normalizeHexColor(hex) || '#0d9488';
+                return {
+                    primary: color,
+                    hover: darkenHex(color, 0.82),
+                    soft: toSoftRgba(color, 0.14)
+                };
+            }
 
             function getStoredTheme() {
                 try {
@@ -156,7 +219,11 @@
             function applyTheme(theme) {
                 const mode = theme.mode || 'light';
                 const color = theme.color || 'teal';
-                const palette = palettes[color] || palettes.teal;
+                const customColor = normalizeHexColor(theme.customColor);
+                const isCustomColor = color === 'custom' && !!customColor;
+                const palette = isCustomColor
+                    ? buildCustomPalette(customColor)
+                    : (palettes[color] || palettes.teal);
 
                 body.classList.toggle('client-dark', mode === 'dark');
                 root.style.setProperty('--client-primary', palette.primary);
@@ -164,7 +231,12 @@
                 root.style.setProperty('--client-primary-soft', palette.soft);
 
                 modeButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.mode === mode));
-                colorButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.color === color));
+                colorButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.color === color && !isCustomColor));
+
+                if (customColorInput) {
+                    customColorInput.value = customColor || '#0d9488';
+                    customColorInput.classList.toggle('active', isCustomColor);
+                }
             }
 
             function updateTheme(patch) {
@@ -204,6 +276,13 @@
                     updateTheme({ color: btn.dataset.color });
                 });
             });
+            if (customColorInput) {
+                customColorInput.addEventListener('input', function () {
+                    const hex = normalizeHexColor(customColorInput.value);
+                    if (!hex) return;
+                    updateTheme({ color: 'custom', customColor: hex });
+                });
+            }
             resetThemeBtn.addEventListener('click', resetTheme);
 
             applyTheme(getStoredTheme());
