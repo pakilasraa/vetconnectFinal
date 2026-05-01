@@ -10,11 +10,68 @@ use Illuminate\View\View;
 
 class MedicineController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $medicines = Medicine::orderBy('name')->get();
+        $today = now()->startOfDay();
+        $search = trim((string) $request->get('search', ''));
+        $status = (string) $request->get('status', 'all');
 
-        return view('medicines.index', compact('medicines'));
+        $query = Medicine::query();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status === 'expired') {
+            $query->whereDate('expiry_date', '<', $today->toDateString());
+        } elseif ($status === 'out') {
+            $query->where('quantity', '<=', 0)
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', $today->toDateString());
+                });
+        } elseif ($status === 'low') {
+            $query->where('quantity', '>', 0)
+                ->whereColumn('quantity', '<=', 'reorder_level')
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', $today->toDateString());
+                });
+        } elseif ($status === 'ok') {
+            $query->whereColumn('quantity', '>', 'reorder_level')
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', $today->toDateString());
+                });
+        }
+
+        $medicines = $query->orderBy('name')->get();
+
+        $allMedicines = Medicine::all();
+        $inventorySummary = [
+            'total_items' => $allMedicines->count(),
+            'total_units' => $allMedicines->sum('quantity'),
+            'ok' => 0,
+            'low' => 0,
+            'out' => 0,
+            'expired' => 0,
+        ];
+
+        foreach ($allMedicines as $medicine) {
+            $state = $medicine->availabilityState();
+            $inventorySummary[$state['key']] = ($inventorySummary[$state['key']] ?? 0) + 1;
+        }
+
+        return view('medicines.index', compact(
+            'medicines',
+            'inventorySummary',
+            'search',
+            'status'
+        ));
     }
 
     public function create(): View
