@@ -92,11 +92,11 @@
                                 </a>
                                 <ul class="hs-dropdown-menu ti-dropdown-menu hidden">
                                     <li><a class="ti-dropdown-item !py-2 !px-[0.9375rem] !text-[0.8125rem] !font-[500] block"
-                                            href="javascript:void(0);">Daily</a></li>
+                                            href="{{ route('admin.appointments.index') }}">Appointments List</a></li>
                                     <li><a class="ti-dropdown-item !py-2 !px-[0.9375rem] !text-[0.8125rem] !font-[500] block"
-                                            href="javascript:void(0);">Weekly</a></li>
+                                            href="{{ route('admin.appointments.calendar') }}">Calendar View</a></li>
                                     <li><a class="ti-dropdown-item !py-2 !px-[0.9375rem] !text-[0.8125rem] !font-[500] block"
-                                            href="javascript:void(0);">Monthly</a></li>
+                                            href="{{ route('admin.medical-records.index') }}">Medical Records</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                                 </a>
                                 <ul class="hs-dropdown-menu ti-dropdown-menu hidden">
                                     <li><a class="ti-dropdown-item !py-2 !px-[0.9375rem] !text-[0.8125rem] !font-[500] block"
-                                            href="javascript:void(0);">View All</a></li>
+                                            href="{{ route('admin.appointments.index') }}">View All</a></li>
                                 </ul>
                             </div>
 
@@ -221,12 +221,23 @@
                         </div>
                         <div class="flex justify-between items-center p-5 !pb-0">
                             <div class="flex -space-x-2 rtl:space-x-reverse"> 
-                                <img class="inline-block avatar avatar-sm !rounded-full ring-0" src="{{ asset('backend/assets/images/faces/11.jpg') }}" alt="Image Description"> 
-                                <img class="inline-block avatar avatar-sm !rounded-full ring-0" src="{{ asset('backend/assets/images/faces/15.jpg') }}" alt="Image Description"> 
-                                <img class="inline-block avatar avatar-sm !rounded-full ring-0" src="{{ asset('backend/assets/images/faces/16.jpg') }}" alt="Image Description"> 
-                                <span class="inline-flex items-center justify-center avatar avatar-sm !rounded-full bg-white/20 border-2 border-white/20 ring-0">
-                                    <span class="font-medium text-white leading-none">9+</span> 
-                                </span>
+                                @forelse($activePetOwnerPreviews as $ownerPreview)
+                                    <img
+                                        class="inline-block avatar avatar-sm !rounded-full ring-0 border border-white/20"
+                                        src="{{ $ownerPreview->photo_url }}"
+                                        alt="{{ $ownerPreview->name }} profile photo"
+                                        title="{{ $ownerPreview->name }}"
+                                    >
+                                @empty
+                                    <span class="inline-flex items-center justify-center avatar avatar-sm !rounded-full bg-white/25 border border-white/20 ring-0">
+                                        <span class="font-medium text-white leading-none">?</span>
+                                    </span>
+                                @endforelse
+                                @if($activePetOwnerRemaining > 0)
+                                    <span class="inline-flex items-center justify-center avatar avatar-sm !rounded-full bg-white/20 border-2 border-white/20 ring-0">
+                                        <span class="font-medium text-white leading-none">{{ $activePetOwnerRemaining }}+</span> 
+                                    </span>
+                                @endif
                             </div>
                         </div>
                         <div id="totalclients" class="pe-2"></div>
