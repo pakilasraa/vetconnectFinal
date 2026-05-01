@@ -12,7 +12,13 @@
         @csrf
 
         <div class="form-group">
-            <p id="selected_date_display" class="text-muted mb-0">Selected date: Please choose a date.</p>
+            <div id="selected_date_display" class="selected-date-banner is-empty">
+                <div class="selected-date-icon" aria-hidden="true">&#128197;</div>
+                <div class="selected-date-content">
+                    <p class="selected-date-label">Selected date</p>
+                    <p class="selected-date-value">Please choose a date.</p>
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
@@ -99,18 +105,36 @@
         function updateSelectedDateDisplay() {
             if (!selectedDateDisplay) return;
             if (!dateInput.value) {
-                selectedDateDisplay.textContent = 'Selected date: Please choose a date.';
+                selectedDateDisplay.classList.add('is-empty');
+                selectedDateDisplay.innerHTML = `
+                    <div class="selected-date-icon" aria-hidden="true">&#128197;</div>
+                    <div class="selected-date-content">
+                        <p class="selected-date-label">Selected date</p>
+                        <p class="selected-date-value">Please choose a date.</p>
+                    </div>
+                `;
                 return;
             }
 
             const date = new Date(dateInput.value + 'T00:00:00');
+            const weekday = date.toLocaleDateString('en-US', {
+                weekday: 'long'
+            });
             const prettyDate = date.toLocaleDateString('en-US', {
-                weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
-            selectedDateDisplay.textContent = `Selected date: ${prettyDate}`;
+
+            selectedDateDisplay.classList.remove('is-empty');
+            selectedDateDisplay.innerHTML = `
+                <div class="selected-date-icon" aria-hidden="true">&#10003;</div>
+                <div class="selected-date-content">
+                    <p class="selected-date-label">Selected date</p>
+                    <p class="selected-date-value">${prettyDate}</p>
+                    <p class="selected-date-day">${weekday}</p>
+                </div>
+            `;
         }
 
         function resetTimeOptions() {
