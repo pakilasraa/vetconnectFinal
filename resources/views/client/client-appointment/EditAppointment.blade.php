@@ -13,6 +13,11 @@
         @method('PUT')
 
         <div class="form-group">
+            <label class="form-label">Reference #</label>
+            <input type="text" class="form-input" value="{{ $appointment->reference_number ?: ('#'.$appointment->id) }}" readonly>
+        </div>
+
+        <div class="form-group">
             <label for="pet_id" class="form-label">Pet</label>
             <input type="text" class="form-input" value="{{ $appointment->pet->name }}" readonly style="background-color: #f8fafc;">
             <input type="hidden" name="pet_id" value="{{ $appointment->pet_id }}">
