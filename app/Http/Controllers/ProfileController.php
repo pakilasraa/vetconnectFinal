@@ -18,7 +18,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        $view = $request->user()->isPetOwner()
+            ? 'client.profile.edit'
+            : 'profile.edit';
+
+        return view($view, [
             'user' => $request->user(),
         ]);
     }
@@ -32,7 +36,24 @@ class ProfileController extends Controller
         $user->fill($request->validated());
 
         if ($request->hasFile('photo')) {
-            $user->photo = $request->file('photo')->store('user-photos', 'public');
+            $previousPhoto = (string) ($user->photo ?? '');
+            $uploadDir = public_path('uploads/user-photos');
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $photoFile = $request->file('photo');
+            $fileName = 'user-' . $user->id . '-' . time() . '.' . $photoFile->getClientOriginalExtension();
+            $photoFile->move($uploadDir, $fileName);
+            $user->photo = 'uploads/user-photos/' . $fileName;
+
+            if (
+                $previousPhoto !== '' &&
+                str_starts_with($previousPhoto, 'uploads/') &&
+                file_exists(public_path($previousPhoto))
+            ) {
+                @unlink(public_path($previousPhoto));
+            }
         }
 
         if ($user->isDirty('email')) {
