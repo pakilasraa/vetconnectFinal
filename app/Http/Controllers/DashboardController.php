@@ -17,6 +17,12 @@ class DashboardController extends Controller
         $newPetsToday = Pet::whereDate('created_at', Carbon::today())->count();
         $totalConsultations = MedicalRecord::count();
         $activePetOwners = User::where('role', 'pet_owner')->distinct()->count();
+        $activePetOwnerPreviews = User::query()
+            ->where('role', 'pet_owner')
+            ->orderByDesc('updated_at')
+            ->take(3)
+            ->get(['id', 'name', 'photo']);
+        $activePetOwnerRemaining = max(0, $activePetOwners - $activePetOwnerPreviews->count());
 
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
@@ -97,6 +103,8 @@ class DashboardController extends Controller
             'newPetsToday',
             'totalConsultations',
             'activePetOwners',
+            'activePetOwnerPreviews',
+            'activePetOwnerRemaining',
             'upcomingAppointments',
             'recentConsultations',
             'recentLogs',
