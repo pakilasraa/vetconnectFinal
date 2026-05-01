@@ -21,8 +21,8 @@
                     <table class="table whitespace-nowrap table-bordered min-w-full">
                         <thead>
                             <tr class="border-b border-defaultborder">
-                                <th scope="col" class="text-start">ID</th>
-                                <th scope="col" class="text-start">Name</th>
+                                <th scope="col" class="text-start">#</th>
+                                <th scope="col" class="text-start">Profile</th>
                                 <th scope="col" class="text-start">Email</th>
                                 <th scope="col" class="text-start">Status</th>
                                 <th scope="col" class="text-start">Date Registered</th>
@@ -32,8 +32,20 @@
                         <tbody>
                             @foreach ($users as $user)
                                 <tr class="border-b border-defaultborder">
-                                    <td>{{ $user->id }}</td>
-                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <img
+                                                src="{{ $user->photo_url }}"
+                                                alt="{{ $user->name }} profile photo"
+                                                class="h-9 w-9 rounded-full object-cover border border-defaultborder"
+                                            >
+                                            <div class="leading-tight">
+                                                <div class="font-medium">{{ $user->name }}</div>
+                                                <div class="text-textmuted text-xs">{{ $user->role === 'admin' ? 'Admin' : 'Pet Owner' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td>{{ $user->email }}</td>
                                     
                                     
