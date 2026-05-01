@@ -33,6 +33,7 @@
         .client-look .avail-legend { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; font-size: 0.875rem; color: var(--client-text); }
         .client-look .avail-dot { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 4px; margin-right: 0.5rem; vertical-align: middle; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
         .client-look .avail-dot-available { background: #22c55e; }
+        .client-look .avail-dot-booked { background: #f59e0b; }
         .client-look .avail-dot-full { background: #ef4444; }
         .client-look .avail-dot-past { background: #94a3b8; }
         .client-look .avail-note { margin: 0.75rem 0 0; font-size: 0.8125rem; }
@@ -41,7 +42,7 @@
         .client-look .avail-cal { border-top: 1px solid var(--client-border); }
         .client-look .avail-cal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-bottom: 1px solid var(--client-border); }
         .client-look .avail-cal-head { background: #fafbfc; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--client-muted); }
-        .client-look .avail-cal-cell { min-height: 4.5rem; padding: 0.5rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; border-right: 1px solid var(--client-border); text-decoration: none; color: inherit; box-sizing: border-box; }
+        .client-look .avail-cal-cell { min-height: 6rem; padding: 0.5rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; border-right: 1px solid var(--client-border); text-decoration: none; color: inherit; box-sizing: border-box; }
         .client-look .avail-cal-row .avail-cal-cell:last-child { border-right: none; }
         .client-look .avail-cal-dow { min-height: auto; padding: 0.65rem 0.5rem; justify-content: center; align-items: center; text-align: center; }
         .client-look .avail-cal-dlabel { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--client-muted); }
@@ -53,9 +54,159 @@
         .client-look .avail-cal-past .avail-cal-tag { background: #f1f5f9; color: #475569; }
         .client-look .avail-cal-full { background: #fff1f2; color: #991b1b; border-left: 4px solid #f43f5e; }
         .client-look .avail-cal-full .avail-cal-tag { background: #ffe4e6; color: #be123c; }
+        .client-look .avail-cal-booked { background: #fffbeb; color: #92400e; border-left: 4px solid #f59e0b; cursor: pointer; transition: all 0.2s ease; }
+        .client-look .avail-cal-booked .avail-cal-tag { background: #fef3c7; color: #b45309; }
+        .client-look .avail-cal-booked:hover { background: #fef3c7; text-decoration: none; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 10; }
         .client-look .avail-cal-open { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; cursor: pointer; transition: all 0.2s ease; }
         .client-look .avail-cal-open .avail-cal-tag { background: #dcfce7; color: #15803d; }
         .client-look .avail-cal-open:hover { background: #dcfce7; text-decoration: none; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 10; }
+
+        /* Appointment list (selected day) */
+        .client-look .appointments-list-full {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .client-look .appointment-card {
+            border: 1px solid var(--client-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            background: #fafbfc;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .client-look .appointment-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .client-look .appointment-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .client-look .appointment-pet-name {
+            margin: 0;
+            font-size: 1.0625rem;
+            font-weight: 600;
+        }
+        .client-look .appointment-type-text {
+            margin: 0.35rem 0 0;
+            font-size: 0.875rem;
+            color: var(--client-muted);
+        }
+        .client-look .appointment-meta-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.25rem;
+            margin-top: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--client-muted);
+        }
+        .client-look .appointment-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Mini event pills inside calendar cells */
+        .client-look .cal-day-events {
+            width: 100%;
+            margin-top: 0.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .client-look .cal-event-pill {
+            width: 100%;
+            padding: 0.18rem 0.35rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            gap: 0.35rem;
+            align-items: baseline;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .client-look .cal-event-pill--pending {
+            background: rgba(245, 158, 11, 0.18);
+            color: #92400e;
+        }
+
+        .client-look .cal-event-pill--confirmed {
+            background: rgba(34, 197, 94, 0.14);
+            color: #166534;
+        }
+
+        .client-look .cal-event-pill--service-consultation {
+            background: rgba(59, 130, 246, 0.16);
+            color: #1d4ed8;
+        }
+
+        .client-look .cal-event-pill--service-vaccination {
+            background: rgba(16, 185, 129, 0.16);
+            color: #047857;
+        }
+
+        .client-look .cal-event-pill--service-check-up {
+            background: rgba(245, 158, 11, 0.18);
+            color: #92400e;
+        }
+
+        .client-look .cal-event-pill--service-surgery {
+            background: rgba(244, 63, 94, 0.16);
+            color: #be123c;
+        }
+
+        .client-look .cal-event-pill--service-grooming {
+            background: rgba(139, 92, 246, 0.16);
+            color: #6d28d9;
+        }
+
+        .client-look .cal-event-pill--service-other {
+            background: rgba(148, 163, 184, 0.2);
+            color: #334155;
+        }
+
+        .client-look .cal-event-time {
+            font-variant-numeric: tabular-nums;
+            color: inherit;
+            opacity: 0.95;
+        }
+
+        .client-look .cal-event-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .client-look .cal-event-more {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--client-muted);
+            padding-left: 0.25rem;
+        }
+
+        /* Status badges */
+        .client-look .badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-radius: 6px;
+        }
+        .client-look .badge-pending { background: #fef3c7; color: #b45309; }
+        .client-look .badge-confirmed { background: #d1fae5; color: #047857; }
+        .client-look .badge-completed { background: #e0e7ff; color: #4338ca; }
+        .client-look .badge-cancelled { background: #fee2e2; color: #b91c1c; }
     </style>
 
     <div class="client-look">
@@ -74,6 +225,7 @@
             <div class="card-body">
                 <div class="avail-legend">
                     <span class="legend-item"><span class="avail-dot avail-dot-available"></span> <strong>Open</strong> — Available for booking</span>
+                    <span class="legend-item"><span class="avail-dot avail-dot-booked"></span> <strong>Booked</strong> — Some slots taken</span>
                     <span class="legend-item"><span class="avail-dot avail-dot-full"></span> <strong>Full</strong> — Clinic at maximum capacity</span>
                     <span class="legend-item"><span class="avail-dot avail-dot-past"></span> <strong>Past</strong> — Date has already passed</span>
                 </div>
@@ -118,13 +270,65 @@
                                         <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
                                         <span class="avail-cal-num">{{ $d->day }}</span>
                                         <span class="avail-cal-tag">Full</span>
+                                        @php $events = $appointmentsByDate[$cell['date_str']] ?? collect(); @endphp
+                                        @if($events->count() > 0)
+                                            <div class="cal-day-events">
+                                                @foreach($events->take(2) as $evt)
+                                                    @php $serviceClass = \Illuminate\Support\Str::slug((string) $evt->service_type) ?: 'other'; @endphp
+                                                    <div class="cal-event-pill cal-event-pill--service-{{ $serviceClass }}">
+                                                        <span class="cal-event-time">{{ \Carbon\Carbon::parse($evt->appointment_time)->format('g:i A') }}</span>
+                                                        <span class="cal-event-label">{{ $evt->service_type }}</span>
+                                                    </div>
+                                                @endforeach
+                                                @if($events->count() > 2)
+                                                    <div class="cal-event-more">+{{ $events->count() - 2 }} more</div>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
+                                @elseif ($cell['status'] === 'booked')
+                                    <a href="{{ route('admin.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-booked">
+                                        <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
+                                        <span class="avail-cal-num">{{ $d->day }}</span>
+                                        <span class="avail-cal-tag">Booked</span>
+                                        <span class="avail-cal-sub">{{ $cell['used'] }}/{{ $cell['total'] }} taken</span>
+                                        @php $events = $appointmentsByDate[$cell['date_str']] ?? collect(); @endphp
+                                        @if($events->count() > 0)
+                                            <div class="cal-day-events">
+                                            @foreach($events->take(2) as $evt)
+                                                    @php $serviceClass = \Illuminate\Support\Str::slug((string) $evt->service_type) ?: 'other'; @endphp
+                                                    <div class="cal-event-pill cal-event-pill--service-{{ $serviceClass }}">
+                                                        <span class="cal-event-time">{{ \Carbon\Carbon::parse($evt->appointment_time)->format('g:i A') }}</span>
+                                                    <span class="cal-event-label">{{ $evt->service_type }}</span>
+                                                    </div>
+                                                @endforeach
+                                                @if($events->count() > 2)
+                                                    <div class="cal-event-more">+{{ $events->count() - 2 }} more</div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </a>
                                 @else
                                     <a href="{{ route('admin.appointments.create', ['date' => $cell['date_str']]) }}" class="avail-cal-cell avail-cal-open">
                                         <span class="avail-cal-dlabel">{{ $d->format('D') }}</span>
                                         <span class="avail-cal-num">{{ $d->day }}</span>
                                         <span class="avail-cal-tag">Open</span>
                                         <span class="avail-cal-sub">{{ $cell['used'] }}/{{ $cell['total'] }} taken</span>
+                                        @php $events = $appointmentsByDate[$cell['date_str']] ?? collect(); @endphp
+                                        @if($events->count() > 0)
+                                            <div class="cal-day-events">
+                                            @foreach($events->take(2) as $evt)
+                                                    @php $serviceClass = \Illuminate\Support\Str::slug((string) $evt->service_type) ?: 'other'; @endphp
+                                                    <div class="cal-event-pill cal-event-pill--service-{{ $serviceClass }}">
+                                                        <span class="cal-event-time">{{ \Carbon\Carbon::parse($evt->appointment_time)->format('g:i A') }}</span>
+                                                <span class="cal-event-label">{{ $evt->service_type }}</span>
+                                                    </div>
+                                                @endforeach
+                                                @if($events->count() > 2)
+                                                    <div class="cal-event-more">+{{ $events->count() - 2 }} more</div>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </a>
                                 @endif
                             @endforeach
@@ -133,5 +337,7 @@
                 </div>
             </div>
         </div>
+
+        {{-- List panel removed: appointments are shown as mini event pills inside each day cell. --}}
     </div>
 @endsection
