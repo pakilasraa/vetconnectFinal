@@ -24,7 +24,7 @@
                     <table class="table whitespace-nowrap table-bordered min-w-full">
                         <thead>
                             <tr class="border-b border-defaultborder">
-                                <th scope="col" class="text-start">ID</th>
+                                <th scope="col" class="text-start">#</th>
                                 <th scope="col" class="text-start">Pet Name</th>
                                 <th scope="col" class="text-start">Owner</th>
                                 <th scope="col" class="text-start">Species</th>
@@ -35,7 +35,7 @@
                         <tbody>
                             @foreach ($pets as $pet)
                                 <tr class="border-b border-defaultborder">
-                                    <td>{{ $pet->id }}</td>
+                                    <td>{{ ($pets->firstItem() ?? 1) + $loop->index }}</td>
                                     <td><a href="{{ panel_route('pets.show', $pet->id) }}" class="text-primary font-medium">{{ $pet->name }}</a></td>
                                     <td>{{ $pet->owner->name }}</td>
                                     <td>{{ $pet->species }}</td>
