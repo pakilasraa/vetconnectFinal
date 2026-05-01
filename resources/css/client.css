@@ -117,19 +117,43 @@ a:hover {
 .logo-icon {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--client-primary), #14b8a6);
+    border-radius: 12px;
+    background: var(--client-primary);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    box-shadow: var(--shadow);
+}
+
+.logo-icon i {
+    color: #ffffff;
+    font-size: 1.2rem;
+    transform: rotate(-15deg);
+    transition: transform 0.2s ease;
+}
+
+.logo:hover .logo-icon i {
+    transform: rotate(0deg) scale(1.08);
 }
 
 .logo-text {
     letter-spacing: -0.02em;
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.logo-text-primary {
+    color: var(--client-primary);
+}
+
+.logo-text-secondary {
+    color: var(--client-text);
+    opacity: 0.78;
+}
+
+body.client-dark .logo-text-secondary {
+    color: #e5e7eb;
+    opacity: 0.85;
 }
 
 .header-search {
@@ -189,6 +213,18 @@ a:hover {
 .icon-btn:hover {
     background: var(--client-bg);
     text-decoration: none;
+}
+
+.profile-link-btn {
+    gap: 0.45rem;
+}
+
+.profile-link-avatar {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid var(--client-border);
 }
 
 button.icon-btn {
@@ -287,6 +323,31 @@ button.icon-btn {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.5rem;
+}
+
+.switcher-color-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.color-picker-input {
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background: none;
+    cursor: pointer;
+}
+
+.color-picker-input.active {
+    border-color: var(--client-text);
+}
+
+.color-picker-help {
+    font-size: 0.78rem;
+    color: var(--client-muted);
 }
 
 .swatch-btn {
@@ -463,6 +524,7 @@ button.icon-btn {
 }
 
 .avail-dot-available { background: #22c55e; }
+.avail-dot-booked { background: #f59e0b; }
 .avail-dot-full { background: #ef4444; }
 .avail-dot-past { background: #94a3b8; }
 
@@ -515,10 +577,91 @@ button.icon-btn {
     text-decoration: none;
     color: inherit;
     box-sizing: border-box;
+    position: relative;
 }
 
 .avail-cal-row .avail-cal-cell:last-child {
     border-right: none;
+}
+
+/* Mini event pills inside calendar cells */
+.cal-day-events {
+    width: 100%;
+    margin-top: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.cal-event-pill {
+    width: 100%;
+    padding: 0.18rem 0.35rem;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    gap: 0.35rem;
+    align-items: baseline;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.cal-event-pill--pending {
+    background: rgba(245, 158, 11, 0.18);
+    color: #92400e;
+}
+
+.cal-event-pill--confirmed {
+    background: rgba(34, 197, 94, 0.14);
+    color: #166534;
+}
+
+.cal-event-pill--service-consultation {
+    background: rgba(59, 130, 246, 0.16);
+    color: #1d4ed8;
+}
+
+.cal-event-pill--service-vaccination {
+    background: rgba(16, 185, 129, 0.16);
+    color: #047857;
+}
+
+.cal-event-pill--service-check-up {
+    background: rgba(245, 158, 11, 0.18);
+    color: #92400e;
+}
+
+.cal-event-pill--service-surgery {
+    background: rgba(244, 63, 94, 0.16);
+    color: #be123c;
+}
+
+.cal-event-pill--service-grooming {
+    background: rgba(139, 92, 246, 0.16);
+    color: #6d28d9;
+}
+
+.cal-event-pill--service-other {
+    background: rgba(148, 163, 184, 0.2);
+    color: #334155;
+}
+
+.cal-event-time {
+    font-variant-numeric: tabular-nums;
+    color: inherit;
+    opacity: 0.95;
+}
+
+.cal-event-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cal-event-more {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--client-muted);
+    padding-left: 0.25rem;
 }
 
 .avail-cal-dow {
@@ -590,6 +733,27 @@ button.icon-btn {
     border-left: 4px solid #22c55e;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.avail-cal-booked {
+    background: #fffbeb;
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.avail-cal-booked .avail-cal-tag {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.avail-cal-booked:hover {
+    background: #fef3c7;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    z-index: 10;
 }
 
 .avail-cal-open .avail-cal-tag {
@@ -734,6 +898,18 @@ button.icon-btn {
 .btn-outline:hover {
     background: var(--client-bg);
     color: var(--client-text);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border-color: var(--client-primary);
+    color: var(--client-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--client-primary-soft);
+    color: var(--client-primary-hover);
+    border-color: var(--client-primary-hover);
 }
 
 .btn-danger {
@@ -1072,6 +1248,28 @@ button.icon-btn {
     color: #b91c1c;
 }
 
+.badge-themed {
+    background: var(--client-primary-soft);
+    color: var(--client-primary);
+    border: 1px solid var(--client-primary);
+}
+
+.badge-themed--pending {
+    opacity: 0.9;
+}
+
+.badge-themed--confirmed {
+    opacity: 1;
+}
+
+.badge-themed--completed {
+    opacity: 0.95;
+}
+
+.badge-themed--cancelled {
+    opacity: 0.75;
+}
+
 /* Tabs */
 .tabs {
     display: flex;
@@ -1152,6 +1350,67 @@ button.icon-btn {
     margin-bottom: 0;
 }
 
+.selected-date-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid rgba(13, 148, 136, 0.28);
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(20, 184, 166, 0.04));
+}
+
+.selected-date-banner.is-empty {
+    border-color: var(--client-border);
+    background: #fafbfc;
+}
+
+.selected-date-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 148, 136, 0.16);
+    color: var(--client-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.selected-date-banner.is-empty .selected-date-icon {
+    background: var(--client-bg);
+    color: var(--client-muted);
+}
+
+.selected-date-content {
+    min-width: 0;
+}
+
+.selected-date-label {
+    margin: 0;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--client-muted);
+    font-weight: 700;
+}
+
+.selected-date-value {
+    margin: 0.1rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--client-text);
+}
+
+.selected-date-day {
+    margin: 0.1rem 0 0;
+    font-size: 0.82rem;
+    color: var(--client-primary);
+    font-weight: 600;
+}
+
 .form-label {
     display: block;
     font-size: 0.8125rem;
@@ -1196,6 +1455,34 @@ button.icon-btn {
 .text-muted {
     color: var(--client-muted);
     font-size: 0.9375rem;
+}
+
+.text-danger {
+    color: #b91c1c;
+    font-size: 0.82rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.client-profile-photo-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.6rem;
+}
+
+.client-profile-photo-preview img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid var(--client-border);
+}
+
+.client-profile-photo-preview .text-muted {
+    margin: 0;
 }
 
 /* Profile (client) */
