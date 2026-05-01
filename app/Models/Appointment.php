@@ -14,6 +14,7 @@ class Appointment extends Model
         'appointment_time',
         'service_type',
         'status',
+        'reference_number',
         'notes',
     ];
 
