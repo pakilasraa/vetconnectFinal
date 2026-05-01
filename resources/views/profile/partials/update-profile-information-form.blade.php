@@ -21,7 +21,7 @@
             <label class="form-label">{{ __('Profile Photo') }}</label>
             <div class="flex items-center gap-4">
                 <div class="h-16 w-16 rounded-full overflow-hidden border border-defaultborder bg-white">
-                    <img src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('backend/assets/images/faces/9.jpg') }}" alt="Profile Photo" class="h-full w-full object-cover">
+                    <img src="{{ $user->photo_url }}" alt="Profile Photo" class="h-full w-full object-cover">
                 </div>
                 <div class="flex-1">
                     <input id="photo" name="photo" type="file" accept="image/*" class="form-control" />
