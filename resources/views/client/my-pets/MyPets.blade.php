@@ -43,7 +43,12 @@
 
                 <div class="pet-card-actions">
                     <a href="{{ panel_route('pets.show', $pet) }}" class="btn btn-outline flex-1">View Details</a>
-                    <a href="{{ panel_route('appointments.create') }}" class="btn btn-primary flex-1">Book Appointment</a>
+                    <a
+                        href="{{ panel_route('appointments.index', ['tab' => 'calendar']) }}"
+                        class="btn btn-primary flex-1"
+                    >
+                        Book Appointment
+                    </a>
                 </div>
             </div>
         @endforeach
