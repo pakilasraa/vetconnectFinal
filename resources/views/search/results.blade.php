@@ -1,6 +1,48 @@
 @extends('layouts.valex')
 @section('page-title', 'Global Search Results')
 
+@section('styles')
+    <style>
+        .search-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.28rem 0.72rem;
+            border-radius: 0.45rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.15;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        }
+
+        .search-action-btn--primary {
+            color: rgb(var(--primary-rgb, 98, 89, 202));
+            border-color: rgba(var(--primary-rgb, 98, 89, 202), 0.28);
+            background-color: rgba(var(--primary-rgb, 98, 89, 202), 0.08);
+        }
+
+        .search-action-btn--primary:hover {
+            color: #fff;
+            border-color: rgb(var(--primary-rgb, 98, 89, 202));
+            background-color: rgb(var(--primary-rgb, 98, 89, 202));
+        }
+
+        .search-action-btn--secondary {
+            color: rgb(var(--secondary-rgb, 8, 59, 130));
+            border-color: rgba(var(--secondary-rgb, 8, 59, 130), 0.28);
+            background-color: rgba(var(--secondary-rgb, 8, 59, 130), 0.08);
+        }
+
+        .search-action-btn--secondary:hover {
+            color: #fff;
+            border-color: rgb(var(--secondary-rgb, 8, 59, 130));
+            background-color: rgb(var(--secondary-rgb, 8, 59, 130));
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="xl:col-span-12 col-span-12 mt-3">
         <div class="box custom-box">
@@ -33,7 +75,7 @@
                                             <td>{{ $pet->owner->name }}</td>
                                             <td>{{ $pet->species }} ({{ $pet->breed ?? 'Unknown' }})</td>
                                             <td>
-                                                <a href="{{ route('admin.pets.show', $pet->id) }}" class="ti-btn ti-btn-sm ti-btn-primary">View</a>
+                                                <a href="{{ route('admin.pets.show', $pet->id) }}" class="search-action-btn search-action-btn--primary">View</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -67,7 +109,7 @@
                                                 <td>{{ $owner->name }}</td>
                                                 <td>{{ $owner->email }}</td>
                                                 <td>
-                                                    <a href="{{ route('admin.users.edit', $owner->id) }}" class="ti-btn ti-btn-sm ti-btn-secondary">Edit User</a>
+                                                    <a href="{{ route('admin.users.edit', $owner->id) }}" class="search-action-btn search-action-btn--secondary">Edit User</a>
                                                 </td>
                                             </tr>
                                         @endforeach
