@@ -76,7 +76,7 @@
                                             <td>{{ $appointment->service_type }}</td>
                                             <td>
                                                 <span class="badge {{ $appointment->status == 'confirmed' ? 'bg-success/10 text-success' : ($appointment->status == 'cancelled' ? 'bg-danger/10 text-danger' : 'bg-info/10 text-info') }}">
-                                                    {{ ucfirst($appointment->status) }}
+                                                    {{ $appointment->status_label }}
                                                 </span>
                                             </td>
                                             <td>

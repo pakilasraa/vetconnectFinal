@@ -40,4 +40,14 @@ class Appointment extends Model
     {
         return $this->service_type;
     }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ((string) $this->status) {
+            'confirmed' => 'Checked-in',
+            'completed' => 'Service Done',
+            'cancelled' => 'Cancelled',
+            default => 'Pending',
+        };
+    }
 }

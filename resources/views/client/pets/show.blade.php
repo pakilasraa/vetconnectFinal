@@ -148,7 +148,7 @@
                                 <td>{{ $appointment->service_type }}</td>
                                 <td>
                                     @php $st = strtolower((string) $appointment->status); @endphp
-                                    <span class="badge @if($st === 'completed') badge-completed @elseif($st === 'cancelled') badge-cancelled @elseif($st === 'confirmed') badge-confirmed @else badge-pending @endif">{{ $appointment->status }}</span>
+                                    <span class="badge @if($st === 'completed') badge-completed @elseif($st === 'cancelled') badge-cancelled @elseif($st === 'confirmed') badge-confirmed @else badge-pending @endif">{{ $appointment->status_label }}</span>
                                 </td>
                             </tr>
                         @endforeach

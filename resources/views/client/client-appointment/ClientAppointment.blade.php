@@ -46,7 +46,7 @@
                     <div class="appointment-main">
                         <div class="appointment-header">
                             <h3 class="appointment-pet-name">{{ $appointment->pet->name }}</h3>
-                            <span class="badge badge-themed badge-themed--{{ $appointment->status }}">{{ $appointment->status }}</span>
+                            <span class="badge badge-themed badge-themed--{{ $appointment->status }}">{{ $appointment->status_label }}</span>
                         </div>
                         <p class="appointment-type-text">{{ $appointment->service_type }}</p>
                         <div class="appointment-meta-grid">

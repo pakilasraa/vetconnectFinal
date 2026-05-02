@@ -177,7 +177,7 @@
                                                                 {{ $appointment->pet->name }}</p>
                                                             <p class="mb-0 text-textmuted">
                                                                 {{ $appointment->owner->name }} •
-                                                                {{ $appointment->status }}</p>
+                                                                {{ $appointment->status_label }}</p>
                                                         </div>
                                                         <div> <span class="text-textmuted inline-flex"><i
                                                                     class="ri-time-line align-middle ltr:mr-1 rtl:ml-1"></i>{{ Carbon\Carbon::parse($appointment->appointment_time)->format('h:ia') }}</span>
