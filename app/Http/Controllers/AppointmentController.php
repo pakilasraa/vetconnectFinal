@@ -210,6 +210,13 @@ class AppointmentController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->paginate(10);
 
+        $todayQueueAppointments = Appointment::query()
+            ->with(['pet', 'owner'])
+            ->whereDate('appointment_date', today()->toDateString())
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('appointment_time')
+            ->get();
+
         foreach ($appointments as $appointment) {
             if (! $appointment->reference_number) {
                 $appointment->reference_number = $this->generateReferenceNumber($appointment->appointment_date);
@@ -217,7 +224,7 @@ class AppointmentController extends Controller
             }
         }
 
-        return view('appointments.index', compact('appointments'));
+        return view('appointments.index', compact('appointments', 'todayQueueAppointments'));
     }
 
     public function calendar(Request $request): View
@@ -518,12 +525,46 @@ class AppointmentController extends Controller
             'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
 
-        $referenceNumber = strtoupper(trim($validated['reference_number']));
+        $referenceNumber = strtoupper(trim((string) $validated['reference_number']));
+        $normalizedReference = preg_replace('/[^A-Z0-9]/', '', $referenceNumber) ?: '';
 
-        $appointment = Appointment::query()
+        if (strlen($normalizedReference) < 4) {
+            return back()->withErrors([
+                'reference_number' => 'Please enter at least 4 characters from the reference number.',
+            ])->withInput();
+        }
+
+        $baseQuery = Appointment::query()
             ->with(['pet', 'owner'])
-            ->whereRaw('UPPER(reference_number) = ?', [$referenceNumber])
+            ->whereRaw("REPLACE(REPLACE(UPPER(reference_number), '-', ''), ' ', '') LIKE ?", ["%{$normalizedReference}%"]);
+
+        $exactMatch = (clone $baseQuery)
+            ->whereRaw("REPLACE(REPLACE(UPPER(reference_number), '-', ''), ' ', '') = ?", [$normalizedReference])
             ->first();
+
+        $appointment = $exactMatch;
+        if (! $appointment) {
+            $matches = (clone $baseQuery)
+                ->orderByRaw("CASE WHEN DATE(appointment_date) = CURDATE() THEN 0 ELSE 1 END")
+                ->orderBy('appointment_date')
+                ->orderBy('appointment_time')
+                ->take(6)
+                ->get();
+
+            if ($matches->count() === 1) {
+                $appointment = $matches->first();
+            } elseif ($matches->count() > 1) {
+                $suggestions = $matches->map(function (Appointment $m) {
+                    $date = Carbon::parse($m->appointment_date)->format('M j');
+                    $time = Carbon::parse($m->appointment_time)->format('g:i A');
+                    return "{$m->reference_number} ({$m->pet->name}, {$date} {$time})";
+                })->implode('; ');
+
+                return back()->withErrors([
+                    'reference_number' => "Multiple matches found. Please enter more characters. Suggestions: {$suggestions}",
+                ])->withInput();
+            }
+        }
 
         if (! $appointment) {
             return back()->withErrors([

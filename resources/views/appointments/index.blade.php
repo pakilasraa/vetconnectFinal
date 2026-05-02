@@ -47,6 +47,60 @@
             color: rgb(var(--primary-rgb));
             opacity: 0.72;
         }
+
+        .today-queue-wrap {
+            border: 1px solid rgba(var(--primary-rgb), 0.18);
+            background: rgba(var(--primary-rgb), 0.04);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .today-queue-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgb(var(--text-muted));
+            font-weight: 700;
+            margin-bottom: 0.55rem;
+        }
+
+        .today-queue-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .today-queue-item {
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            background: white;
+            color: rgb(var(--primary-rgb));
+            border-radius: 999px;
+            font-size: 0.74rem;
+            padding: 0.25rem 0.55rem;
+            cursor: pointer;
+            line-height: 1.15;
+        }
+
+        .today-queue-item:hover {
+            background: rgba(var(--primary-rgb), 0.09);
+        }
+
+        .quick-one-click-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-left: 0.25rem;
+            font-size: 0.72rem;
+            color: rgb(var(--text-muted));
+            user-select: none;
+        }
+
+        .quick-one-click-wrap input[type="checkbox"] {
+            width: 0.9rem;
+            height: 0.9rem;
+            cursor: pointer;
+        }
     </style>
 @endsection
 
@@ -81,14 +135,26 @@
                         >
                         <select id="quick-check-in-status" name="status" class="form-control form-control-sm" required>
                             @foreach (['pending', 'confirmed', 'completed', 'cancelled'] as $statusOption)
+                                @php
+                                    $statusLabel = [
+                                        'pending' => 'Pending',
+                                        'confirmed' => 'Checked-in',
+                                        'completed' => 'Service Done',
+                                        'cancelled' => 'Cancelled',
+                                    ][$statusOption] ?? ucfirst($statusOption);
+                                @endphp
                                 <option value="{{ $statusOption }}" {{ old('status', 'confirmed') === $statusOption ? 'selected' : '' }}>
-                                    {{ ucfirst($statusOption) }}
+                                    {{ $statusLabel }}
                                 </option>
                             @endforeach
                         </select>
                         <button id="quick-check-in-submit" type="submit" class="ti-btn ti-btn-success !py-1 !px-2 !font-medium !text-[0.75rem]">
                             Update by Ref
                         </button>
+                        <label class="quick-one-click-wrap" title="When enabled, clicking Today queue item submits immediately.">
+                            <input type="checkbox" id="quick-one-click-toggle">
+                            <span>One-click update</span>
+                        </label>
                     </form>
                     <a href="{{ route('admin.appointments.calendar') }}" class="ti-btn ti-btn-secondary !py-1 !px-2 !font-medium !text-[0.75rem]">
                         <i class="ri-calendar-2-line me-1"></i> Calendar
@@ -102,6 +168,24 @@
                 </div>
             </div>
             <div class="box-body">
+                @if(isset($todayQueueAppointments) && $todayQueueAppointments->isNotEmpty())
+                    <div class="today-queue-wrap">
+                        <div class="today-queue-title">Today queue (quick pick)</div>
+                        <div class="today-queue-list">
+                            @foreach($todayQueueAppointments as $todayAppt)
+                                <button
+                                    type="button"
+                                    class="today-queue-item"
+                                    data-ref="{{ $todayAppt->reference_number }}"
+                                    title="Use {{ $todayAppt->reference_number }}"
+                                >
+                                    {{ \Carbon\Carbon::parse($todayAppt->appointment_time)->format('g:i A') }} - {{ $todayAppt->pet->name }} - {{ $todayAppt->reference_number }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <div class="table-responsive">
                     <table class="table whitespace-nowrap table-bordered min-w-full">
                         <thead>
@@ -127,7 +211,7 @@
                                     <td>{{ $appointment->service_type }}</td>
                                     <td>
                                         <span class="appointment-status-badge appointment-status-badge--{{ $appointment->status }}">
-                                            {{ ucfirst($appointment->status) }}
+                                            {{ $appointment->status_label }}
                                         </span>
                                     </td>
                                     <td>
@@ -164,11 +248,26 @@
         const form = document.getElementById('quick-check-in-form');
         const referenceInput = document.getElementById('quick-reference-number');
         const submitBtn = document.getElementById('quick-check-in-submit');
+        const oneClickToggle = document.getElementById('quick-one-click-toggle');
+        const quickPickButtons = Array.from(document.querySelectorAll('.today-queue-item'));
         if (!form || !referenceInput || !submitBtn) return;
+
+        function normalizeReference(value) {
+            return String(value || '')
+                .toUpperCase()
+                .replace(/[^A-Z0-9-]/g, '');
+        }
 
         window.requestAnimationFrame(() => {
             referenceInput.focus();
             referenceInput.select();
+        });
+
+        referenceInput.addEventListener('input', function () {
+            const normalized = normalizeReference(referenceInput.value);
+            if (referenceInput.value !== normalized) {
+                referenceInput.value = normalized;
+            }
         });
 
         referenceInput.addEventListener('keydown', function (event) {
@@ -176,6 +275,43 @@
             event.preventDefault();
             if (!referenceInput.value.trim()) return;
             submitBtn.click();
+        });
+
+        form.addEventListener('submit', function () {
+            referenceInput.value = normalizeReference(referenceInput.value).trim();
+        });
+
+        const oneClickStorageKey = 'appointments.quickOneClickUpdate';
+        if (oneClickToggle) {
+            oneClickToggle.checked = window.localStorage.getItem(oneClickStorageKey) === '1';
+            oneClickToggle.addEventListener('change', function () {
+                window.localStorage.setItem(oneClickStorageKey, oneClickToggle.checked ? '1' : '0');
+            });
+        }
+
+        quickPickButtons.forEach((btn) => {
+            btn.addEventListener('click', function () {
+                referenceInput.value = normalizeReference(btn.dataset.ref || '');
+                referenceInput.focus();
+                referenceInput.select();
+
+                if (!oneClickToggle || !oneClickToggle.checked) return;
+                if (!referenceInput.value.trim()) return;
+
+                const selectedStatus = document.getElementById('quick-check-in-status');
+                const statusValue = selectedStatus ? selectedStatus.value : 'confirmed';
+                const statusLabels = {
+                    pending: 'Pending',
+                    confirmed: 'Checked-in',
+                    completed: 'Service Done',
+                    cancelled: 'Cancelled'
+                };
+                const statusLabel = statusLabels[statusValue] || statusValue;
+                const ok = window.confirm(`Update ${referenceInput.value} to "${statusLabel}" now?`);
+                if (!ok) return;
+
+                submitBtn.click();
+            });
         });
     })();
 </script>

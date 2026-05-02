@@ -78,8 +78,8 @@
                             <label for="status" class="form-label">Status</label>
                             <select name="status" id="status" class="form-control" required>
                                 <option value="pending" {{ old('status', $appointment->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="confirmed" {{ old('status', $appointment->status) == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                                <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="confirmed" {{ old('status', $appointment->status) == 'confirmed' ? 'selected' : '' }}>Checked-in</option>
+                                <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Service Done</option>
                                 <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                             </select>
                             @error('status') <p class="text-danger mt-1">{{ $message }}</p> @enderror
