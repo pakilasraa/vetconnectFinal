@@ -60,6 +60,7 @@
                         </option>
                     @endforeach
                 </select>
+                <p id="appointment_time_hint" class="text-muted mt-1 mb-0" style="font-size: 12px;"></p>
                 @error('appointment_time') <p class="text-error mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
@@ -76,4 +77,72 @@
         </div>
     </form>
 </div>
+
+<script>
+    (function () {
+        const dateInput = document.getElementById('appointment_date');
+        const timeSelect = document.getElementById('appointment_time');
+        const hint = document.getElementById('appointment_time_hint');
+        if (!dateInput || !timeSelect) return;
+
+        const options = Array.from(timeSelect.options).filter((option) => option.value !== '');
+
+        function updateTimeHint(bookedCount) {
+            if (!hint) return;
+            if (!dateInput.value) {
+                hint.textContent = 'Select a date to see which time slots are already taken.';
+                return;
+            }
+            hint.textContent = bookedCount > 0
+                ? `${bookedCount} slot(s) already taken for this day.`
+                : 'All time slots are currently open for this day.';
+        }
+
+        async function refreshBookedSlots() {
+            const selectedDate = dateInput.value;
+            options.forEach((option) => {
+                option.disabled = false;
+                option.textContent = option.textContent.replace(' (Taken)', '');
+            });
+
+            if (!selectedDate) {
+                updateTimeHint(0);
+                return;
+            }
+
+            try {
+                const response = await fetch(`{{ route('client.appointments.booked-slots') }}?date=${encodeURIComponent(selectedDate)}&exclude_id={{ $appointment->id }}`);
+                if (!response.ok) {
+                    updateTimeHint(0);
+                    return;
+                }
+
+                const data = await response.json();
+                const booked = new Set((data.booked || []).map(String));
+                let bookedCount = 0;
+
+                options.forEach((option) => {
+                    if (booked.has(option.value)) {
+                        bookedCount++;
+                        option.disabled = true;
+                        if (!option.textContent.includes(' (Taken)')) {
+                            option.textContent = `${option.textContent} (Taken)`;
+                        }
+                    }
+                });
+
+                if (timeSelect.value && timeSelect.selectedOptions[0]?.disabled) {
+                    timeSelect.value = '';
+                }
+
+                updateTimeHint(bookedCount);
+            } catch (error) {
+                updateTimeHint(0);
+            }
+        }
+
+        dateInput.addEventListener('change', refreshBookedSlots);
+        refreshBookedSlots();
+    })();
+</script>
 @endsection
