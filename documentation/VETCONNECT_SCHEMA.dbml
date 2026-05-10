@@ -1,0 +1,182 @@
+Project vetconnect_v2 {
+  database_type: "MySQL"
+  note: "Generated from ran Laravel migrations (migrate:status) on 2026-05-05."
+}
+
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [not null, unique]
+  email_verified_at timestamp
+  password varchar [not null]
+  remember_token varchar
+  created_at timestamp
+  updated_at timestamp
+
+  status boolean [not null, default: true]
+  birthdate date
+  photo varchar
+  role varchar [not null, default: "owner", note: "App normalizes owner -> pet_owner; vet/staff -> admin"]
+  phone varchar
+}
+
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar [not null]
+  created_at timestamp
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id bigint
+  ip_address varchar(45)
+  user_agent text
+  payload longtext [not null]
+  last_activity int [not null]
+
+  indexes {
+    user_id
+    last_activity
+  }
+}
+
+Table cache {
+  key varchar [pk]
+  value mediumtext [not null]
+  expiration int [not null]
+
+  indexes {
+    expiration
+  }
+}
+
+Table cache_locks {
+  key varchar [pk]
+  owner varchar [not null]
+  expiration int [not null]
+
+  indexes {
+    expiration
+  }
+}
+
+Table jobs {
+  id bigint [pk, increment]
+  queue varchar [not null]
+  payload longtext [not null]
+  attempts tinyint [not null]
+  reserved_at int
+  available_at int [not null]
+  created_at int [not null]
+
+  indexes {
+    queue
+  }
+}
+
+Table job_batches {
+  id varchar [pk]
+  name varchar [not null]
+  total_jobs int [not null]
+  pending_jobs int [not null]
+  failed_jobs int [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext
+  cancelled_at int
+  created_at int [not null]
+  finished_at int
+}
+
+Table failed_jobs {
+  id bigint [pk, increment]
+  uuid varchar [not null, unique]
+  connection text [not null]
+  queue text [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [not null]
+}
+
+Table pets {
+  id bigint [pk, increment]
+  owner_id bigint [not null]
+  name varchar [not null]
+  species varchar [not null]
+  breed varchar
+  gender varchar
+  birth_date date
+  weight decimal(8,2)
+  medical_history text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table appointments {
+  id bigint [pk, increment]
+  pet_id bigint [not null]
+  user_id bigint [not null]
+  appointment_date date [not null]
+  appointment_time time [not null]
+  service_type varchar [not null]
+  status varchar [not null, default: "pending"]
+  reference_number varchar(32) [unique]
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table medical_records {
+  id bigint [pk, increment]
+  pet_id bigint [not null]
+  vet_id bigint [not null]
+  visit_date date [not null]
+  diagnosis text [not null]
+  treatment text
+  prescription text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table vaccination_records {
+  id bigint [pk, increment]
+  pet_id bigint [not null]
+  vaccine_name varchar [not null]
+  administered_date date [not null]
+  due_date date
+  status varchar [not null, default: "given"]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table activity_logs {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  action varchar [not null]
+  description text
+  model_type varchar
+  model_id bigint
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table medicines {
+  id bigint [pk, increment]
+  name varchar [not null]
+  sku varchar
+  quantity int [not null, default: 0]
+  unit varchar(32) [not null, default: "pc"]
+  expiry_date date
+  reorder_level int [not null, default: 5]
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: sessions.user_id > users.id
+Ref: pets.owner_id > users.id [delete: cascade]
+Ref: appointments.pet_id > pets.id [delete: cascade]
+Ref: appointments.user_id > users.id [delete: cascade]
+Ref: medical_records.pet_id > pets.id [delete: cascade]
+Ref: medical_records.vet_id > users.id [delete: cascade]
+Ref: vaccination_records.pet_id > pets.id [delete: cascade]
+Ref: activity_logs.user_id > users.id [delete: cascade]
