@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'VetConnect - Pet Care Management')</title>
+    <link id="theme-favicon" rel="icon" type="image/svg+xml" href="{{ asset('backend/assets/iconfonts/fontawesome/svgs/solid/paw.svg') }}">
+    <link id="theme-favicon-shortcut" rel="shortcut icon" href="{{ asset('backend/assets/iconfonts/fontawesome/svgs/solid/paw.svg') }}">
     <link rel="stylesheet" href="{{ asset('backend/assets/iconfonts/fontawesome/css/all.css') }}">
     @vite(['resources/css/client.css'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"/>
@@ -146,6 +148,8 @@
             const resetThemeBtn = document.getElementById('resetClientTheme');
             const body = document.body;
             const root = document.documentElement;
+            const faviconLink = document.getElementById('theme-favicon');
+            const faviconShortcutLink = document.getElementById('theme-favicon-shortcut');
 
             const palettes = {
                 teal: { primary: '#0d9488', hover: '#0f766e', soft: 'rgba(13, 148, 136, 0.12)' },
@@ -204,6 +208,18 @@
                 };
             }
 
+            function buildPawFaviconDataUri(hexColor) {
+                const color = normalizeHexColor(hexColor) || '#0d9488';
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="${color}" d="M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5s.3-86.2 32.6-96.8s70.1 15.6 84.4 58.5zM100.4 198.6c18.9 32.4 14.3 70.1-10.2 84.1s-59.7-.9-78.5-33.3S-2.7 179.3 21.8 165.3s59.7 .9 78.5 33.3zM69.2 401.2C121.6 259.9 214.7 224 256 224s134.4 35.9 186.8 177.2c3.6 9.7 5.2 20.1 5.2 30.5v1.6c0 25.8-20.9 46.7-46.7 46.7c-11.5 0-22.9-1.4-34-4.2l-88-22c-15.3-3.8-31.3-3.8-46.6 0l-88 22c-11.1 2.8-22.5 4.2-34 4.2C84.9 480 64 459.1 64 433.3v-1.6c0-10.4 1.6-20.8 5.2-30.5zM421.8 282.7c-24.5-14-29.1-51.7-10.2-84.1s54-47.3 78.5-33.3s29.1 51.7 10.2 84.1s-54 47.3-78.5 33.3zM310.1 189.7c-32.3-10.6-46.9-53.9-32.6-96.8s52.1-69.1 84.4-58.5s46.9 53.9 32.6 96.8s-52.1 69.1-84.4 58.5z"/></svg>`;
+                return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+            }
+
+            function applyFaviconTheme(hexColor) {
+                const faviconDataUri = buildPawFaviconDataUri(hexColor);
+                if (faviconLink) faviconLink.setAttribute('href', faviconDataUri);
+                if (faviconShortcutLink) faviconShortcutLink.setAttribute('href', faviconDataUri);
+            }
+
             function getStoredTheme() {
                 try {
                     return JSON.parse(localStorage.getItem(themeStorageKey) || '{}');
@@ -229,6 +245,7 @@
                 root.style.setProperty('--client-primary', palette.primary);
                 root.style.setProperty('--client-primary-hover', palette.hover);
                 root.style.setProperty('--client-primary-soft', palette.soft);
+                applyFaviconTheme(palette.primary);
 
                 modeButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.mode === mode));
                 colorButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.color === color && !isCustomColor));
